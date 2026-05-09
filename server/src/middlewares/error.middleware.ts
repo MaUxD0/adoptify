@@ -1,0 +1,16 @@
+import { Request, Response, NextFunction } from 'express';
+
+export function errorHandler(
+  err: Error,
+  _req: Request,
+  res: Response,
+  _next: NextFunction,
+): void {
+  console.error(`[ERROR] ${err.name}: ${err.message}`);
+
+  res.status(500).json({
+    success: false,
+    message: 'Internal server error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+}
