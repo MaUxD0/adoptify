@@ -3,7 +3,9 @@ import cors from 'cors'
 import { errorMiddleware } from './middlewares/error.middleware'
 import authRoutes from './modules/auth/auth.routes'
 
-const app = express()
+import petsRoutes from "./modules/pets/pets.routes";
+
+const app = express();
 
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
@@ -21,5 +23,6 @@ app.get('/api/health', (_req, res) => {
 
 // Error handler (siempre al final)
 app.use(errorMiddleware)
+app.use("/api/pets", petsRoutes);
 
 export default app
