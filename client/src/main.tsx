@@ -14,14 +14,18 @@ import {
   PetsProvider,
 } from "./providers/PetsProvider";
 
+import { AuthProvider } from "./providers/AuthProvider";
+
 ReactDOM.createRoot(
   document.getElementById("root")!
 ).render(
   <React.StrictMode>
     <BrowserRouter>
-      <PetsProvider>
-        <App />
-      </PetsProvider>
+      <AuthProvider>
+        <PetsProvider>
+          <App />
+        </PetsProvider>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
