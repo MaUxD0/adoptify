@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -19,7 +20,14 @@ export const PetsProvider = ({
   children,
 }: Props) => {
   const [pets, setPets] = useState<Pet[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [
+    speciesFilter,
+    setSpeciesFilter,
+  ] = useState("");
 
   useEffect(() => {
     const fetchPets = async () => {
@@ -27,7 +35,7 @@ export const PetsProvider = ({
         const response =
           await PetsService.getAllPets();
 
-        setPets(response.data);
+        setPets(response);
       } catch (error) {
         console.error(error);
       } finally {
@@ -38,11 +46,31 @@ export const PetsProvider = ({
     fetchPets();
   }, []);
 
+  const filteredPets = useMemo(() => {
+    return pets.filter((pet) => {
+      if (
+        speciesFilter &&
+        pet.species !== speciesFilter
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [pets, speciesFilter]);
+
   return (
     <PetsContext.Provider
       value={{
         pets,
+
+        filteredPets,
+
         loading,
+
+        speciesFilter,
+
+        setSpeciesFilter,
       }}
     >
       {children}

@@ -1,22 +1,37 @@
 import PetCard from "../../components/pet/PetCard";
 
+import PetFilters from "../../components/pet/PetFilters";
+
 import { usePets } from "../../hooks/usePets";
 
 const HomePage = () => {
-  const { pets, loading } = usePets();
+  const {
+    filteredPets,
+    loading,
+  } = usePets();
 
   if (loading) {
-    return <p>Loading pets...</p>;
+    return <p>Loading...</p>;
   }
 
   return (
-    <div className="grid grid-cols-3 gap-6 p-6">
-      {pets.map((pet) => (
-        <PetCard
-          key={pet.id}
-          pet={pet}
-        />
-      ))}
+    <div style={{ padding: "24px" }}>
+      <PetFilters />
+
+      <div
+        style={{
+          display: "flex",
+          gap: "24px",
+          flexWrap: "wrap",
+        }}
+      >
+        {filteredPets.map((pet) => (
+          <PetCard
+            key={pet.id}
+            pet={pet}
+          />
+        ))}
+      </div>
     </div>
   );
 };
