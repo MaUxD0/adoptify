@@ -13,15 +13,19 @@ app.use(cors({
 }))
 app.use(express.json())
 
-// Rutas
+
 app.use('/api/auth', authRoutes)
 
-// Health check
+import usersRoutes from './modules/users/users.routes'
+// ...
+app.use('/api/users', usersRoutes)
+
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
 
-// Error handler (siempre al final)
+
 app.use(errorMiddleware)
 app.use("/api/pets", petsRoutes);
 
