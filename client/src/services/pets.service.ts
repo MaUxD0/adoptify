@@ -29,6 +29,19 @@ export class PetsService {
     return response.data.data;
   }
 
+  static async updatePet(
+    id: string,
+    data: unknown
+  ) {
+    const response =
+      await axiosInstance.patch(
+        `/pets/${id}`,
+        data
+      );
+
+    return response.data.data;
+  }
+
   static async deletePet(id: string) {
     const response =
       await axiosInstance.delete(

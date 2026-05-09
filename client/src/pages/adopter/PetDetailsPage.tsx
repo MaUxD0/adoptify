@@ -99,6 +99,15 @@ const PetDetailsPage = () => {
         <button>
           Adopt
         </button>
+        <button
+        onClick={() =>
+        navigate(
+      `/shelter/edit-pet/${pet.id}`
+    )
+  }
+>
+  Edit Pet
+</button>
 
         <button
           onClick={handleDelete}

@@ -54,6 +54,25 @@ export class PetsService {
     return pet;
   }
 
+  static async updatePet(
+    id: string,
+    data: Partial<CreatePetDTO>
+  ) {
+    const { data: pet, error } =
+      await supabase
+        .from("pets")
+        .update(data)
+        .eq("id", id)
+        .select()
+        .single();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return pet;
+  }
+
   static async deletePet(id: string) {
     const { error } =
       await supabase

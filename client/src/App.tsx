@@ -9,6 +9,9 @@ import PetDetailsPage from "./pages/adopter/PetDetailsPage";
 
 import CreatePetPage from "./pages/shelter/CreatePetPage";
 
+import EditPetPage from "./pages/shelter/EditPetPage";
+
+
 function App() {
   return (
     <Routes>
@@ -25,6 +28,10 @@ function App() {
       <Route
         path="/shelter/create-pet"
         element={<CreatePetPage />}
+      />
+      <Route
+      path="/shelter/edit-pet/:id"
+      element={<EditPetPage />}
       />
     </Routes>
   );

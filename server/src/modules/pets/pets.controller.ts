@@ -119,6 +119,43 @@ export class PetsController {
     }
   }
 
+  static async updatePet(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+    }
+
+    const pet =
+      await PetsService.updatePet(
+        id,
+        req.body
+      );
+
+    res.status(200).json({
+      success: true,
+      data: pet,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Server error",
+    });
+  }
+}
+
  static async deletePet(
   req: Request,
   res: Response
