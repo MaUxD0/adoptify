@@ -8,7 +8,11 @@ import {
 
 import App from "./App";
 
-import { PetsProvider } from "./providers/PetsProvider";
+import "./index.css";
+
+import {
+  PetsProvider,
+} from "./providers/PetsProvider";
 
 ReactDOM.createRoot(
   document.getElementById("root")!
