@@ -1,18 +1,8 @@
-import { createContext, useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { supabase } from '../api/supabase'
 import { authService } from '../services/auth.service'
 import type { User, LoginFormData, RegisterFormData } from '../types/auth.types'
-
-interface AuthContextType {
-  user: User | null
-  loading: boolean
-  error: string | null
-  login: (data: LoginFormData) => Promise<void>
-  register: (data: RegisterFormData) => Promise<void>
-  logout: () => Promise<void>
-}
-
-export const AuthContext = createContext<AuthContextType | null>(null)
+import { AuthContext } from '../contexts/AuthContext'
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)

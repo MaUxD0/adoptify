@@ -1,13 +1,66 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADOPTER
+  SHELTER
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  fullName   String
+  role       Role     @default(ADOPTER)
+  avatarUrl  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  pets       Pet[]    @relation("PostedPets")
+  adoptions  Adoption[]
+}
+
+model Pet {
+  id          String   @id @default(uuid())
+  name        String
+  species     String
+  breed       String?
+  age         Int?
+  description String?
+  status      PetStatus @default(AVAILABLE)
+  postedById  String
+  postedBy    User     @relation("PostedPets", fields: [postedById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  adoptions   Adoption[]
+}
+
+enum PetStatus {
+  AVAILABLE
+  ADOPTED
+  PENDING
+}
+
+model Adoption {
+  id        String   @id @default(uuid())
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id])
+  adopterId String
+  adopter   User     @relation(fields: [adopterId], references: [id])
+  status    AdoptionStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AdoptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
