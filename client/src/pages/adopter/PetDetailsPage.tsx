@@ -1,17 +1,41 @@
 import {
+  useNavigate,
   useParams,
 } from "react-router-dom";
 
 import { usePets } from "../../hooks/usePets";
 
+import { PetsService } from "../../services/pets.service";
+
 const PetDetailsPage = () => {
   const { id } = useParams();
+
+  const navigate = useNavigate();
 
   const { pets } = usePets();
 
   const pet = pets.find(
     (pet) => pet.id === id
   );
+
+  const handleDelete =
+    async () => {
+      if (!id) return;
+
+      try {
+        await PetsService.deletePet(id);
+
+        alert("Pet deleted");
+
+        navigate("/");
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "Error deleting pet"
+        );
+      }
+    };
 
   if (!pet) {
     return <p>Pet not found</p>;
@@ -65,15 +89,23 @@ const PetDetailsPage = () => {
         {pet.description}
       </p>
 
-      <button
+      <div
         style={{
+          display: "flex",
+          gap: "16px",
           marginTop: "24px",
-          padding: "12px 24px",
-          cursor: "pointer",
         }}
       >
-        Adopt
-      </button>
+        <button>
+          Adopt
+        </button>
+
+        <button
+          onClick={handleDelete}
+        >
+          Delete Pet
+        </button>
+      </div>
     </div>
   );
 };

@@ -10,12 +10,16 @@ export class PetsService {
 
   static async getPetById(id: string) {
     const response =
-      await axiosInstance.get(`/pets/${id}`);
+      await axiosInstance.get(
+        `/pets/${id}`
+      );
 
     return response.data.data;
   }
 
-  static async createPet(data: unknown) {
+  static async createPet(
+    data: unknown
+  ) {
     const response =
       await axiosInstance.post(
         "/pets",
@@ -23,5 +27,14 @@ export class PetsService {
       );
 
     return response.data.data;
+  }
+
+  static async deletePet(id: string) {
+    const response =
+      await axiosInstance.delete(
+        `/pets/${id}`
+      );
+
+    return response.data;
   }
 }

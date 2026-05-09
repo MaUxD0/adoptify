@@ -1,12 +1,15 @@
 import { supabase } from "../../config/supabase";
-import { CreatePetDTO } from "./pets.types";
+
+import type {
+  CreatePetDTO,
+} from "./pets.types";
 
 export class PetsService {
   static async getAllPets() {
-    const { data, error } = await supabase
-      .from("pets")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const { data, error } =
+      await supabase
+        .from("pets")
+        .select("*");
 
     if (error) {
       throw new Error(error.message);
@@ -16,11 +19,12 @@ export class PetsService {
   }
 
   static async getPetById(id: string) {
-    const { data, error } = await supabase
-      .from("pets")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { data, error } =
+      await supabase
+        .from("pets")
+        .select("*")
+        .eq("id", id)
+        .single();
 
     if (error) {
       throw new Error(error.message);
@@ -31,23 +35,36 @@ export class PetsService {
 
   static async createPet(
     shelterId: string,
-    petData: CreatePetDTO
+    data: CreatePetDTO
   ) {
-    const { data, error } = await supabase
-      .from("pets")
-      .insert([
-        {
+    const { data: pet, error } =
+      await supabase
+        .from("pets")
+        .insert({
+          ...data,
           shelter_id: shelterId,
-          ...petData,
-        },
-      ])
-      .select()
-      .single();
+        })
+        .select()
+        .single();
 
     if (error) {
       throw new Error(error.message);
     }
 
-    return data;
+    return pet;
+  }
+
+  static async deletePet(id: string) {
+    const { error } =
+      await supabase
+        .from("pets")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return true;
   }
 }

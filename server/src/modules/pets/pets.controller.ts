@@ -118,4 +118,36 @@ export class PetsController {
       });
     }
   }
-}
+
+ static async deletePet(
+  req: Request,
+  res: Response
+) {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+    }
+
+    await PetsService.deletePet(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Pet deleted",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Server error",
+    });
+  }
+} }
