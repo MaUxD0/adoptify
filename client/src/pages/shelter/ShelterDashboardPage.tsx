@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { usePets } from "../../hooks/usePets";
 import { useAuth } from "../../hooks/useAuth";
 import { PetsService } from "../../services/pets.service";
 import type { Pet } from "../../types/pet.types";
+
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80";
@@ -231,7 +232,7 @@ const ShelterDashboardPage = () => {
 type NavBtnProps = { icon: string; label: string; active?: boolean; onClick: () => void };
 
 const NavBtn = ({ icon, label, active, onClick }: NavBtnProps) => {
-  const icons: Record<string, React.ReactElement> = {
+const icons: Record<string, React.ReactElement> = {
     dashboard: (
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />

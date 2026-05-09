@@ -1,13 +1,32 @@
-import express from "express";
-import cors from "cors";
+import express from 'express'
+import cors from 'cors'
+import { errorMiddleware } from './middlewares/error.middleware'
+import authRoutes from './modules/auth/auth.routes'
 
 import petsRoutes from "./modules/pets/pets.routes";
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
+}))
+app.use(express.json())
 
+
+app.use('/api/auth', authRoutes)
+
+import usersRoutes from './modules/users/users.routes'
+// ...
+app.use('/api/users', usersRoutes)
+
+
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() })
+})
+
+
+app.use(errorMiddleware)
 app.use("/api/pets", petsRoutes);
 
-export default app;
+export default app
