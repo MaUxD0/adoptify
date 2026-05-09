@@ -14,4 +14,14 @@ export class PetsService {
 
     return response.data.data;
   }
+
+  static async createPet(data: unknown) {
+    const response =
+      await axiosInstance.post(
+        "/pets",
+        data
+      );
+
+    return response.data.data;
+  }
 }
