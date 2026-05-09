@@ -1,38 +1,86 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 
+// Auth
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+
+// Adopter
 import HomePage from "./pages/adopter/HomePage";
 import PetDetailsPage from "./pages/adopter/PetDetailsPage";
 
+// Shelter
 import ShelterDashboardPage from "./pages/shelter/ShelterDashboardPage";
 import CreatePetPage from "./pages/shelter/CreatePetPage";
 import EditPetPage from "./pages/shelter/EditPetPage";
 import AdoptionRequestsPage from "./pages/shelter/AdoptionRequestsPage";
 
 function App() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // Mientras Supabase verifica la sesión, no renderizamos nada
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-400 text-sm">Cargando...</p>
+      </div>
+    );
+  }
+
   const isShelter = user?.role === "shelter";
 
   return (
     <Routes>
-      {/* Raíz: redirige según el rol del usuario */}
+      {/* ── RUTAS PÚBLICAS ── */}
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/" replace /> : <LoginPage />}
+      />
+      <Route
+        path="/register"
+        element={user ? <Navigate to="/" replace /> : <RegisterPage />}
+      />
+
+      {/* ── RAÍZ: redirige según rol o manda a login ── */}
       <Route
         path="/"
         element={
-          isShelter
-            ? <Navigate to="/shelter/dashboard" replace />
-            : <HomePage />
+          !user ? (
+            <Navigate to="/login" replace />
+          ) : isShelter ? (
+            <Navigate to="/shelter/dashboard" replace />
+          ) : (
+            <HomePage />
+          )
         }
       />
 
-      {/* ── RUTAS ADOPTANTE ── */}
-      <Route path="/pets/:id" element={<PetDetailsPage />} />
+      {/* ── RUTAS ADOPTANTE (requieren sesión) ── */}
+      <Route
+        path="/pets/:id"
+        element={user ? <PetDetailsPage /> : <Navigate to="/login" replace />}
+      />
 
-      {/* ── RUTAS SHELTER ── */}
-      <Route path="/shelter/dashboard" element={<ShelterDashboardPage />} />
-      <Route path="/shelter/create-pet" element={<CreatePetPage />} />
-      <Route path="/shelter/edit-pet/:id" element={<EditPetPage />} />
-      <Route path="/shelter/requests" element={<AdoptionRequestsPage />} />
+      {/* ── RUTAS SHELTER (requieren sesión + rol shelter) ── */}
+      <Route
+        path="/shelter/dashboard"
+        element={isShelter ? <ShelterDashboardPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/shelter/create-pet"
+        element={isShelter ? <CreatePetPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/shelter/edit-pet/:id"
+        element={isShelter ? <EditPetPage /> : <Navigate to="/login" replace />}
+      />
+      <Route
+        path="/shelter/requests"
+        element={isShelter ? <AdoptionRequestsPage /> : <Navigate to="/login" replace />}
+      />
+
+      {/* ── FALLBACK ── */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

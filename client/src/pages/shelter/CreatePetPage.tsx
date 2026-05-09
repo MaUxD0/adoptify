@@ -3,7 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { PetsService } from "../../services/pets.service";
 import { useAuth } from "../../hooks/useAuth";
 
-const SPECIES_OPTIONS = ["Perro", "Gato", "Conejo", "Ave", "Otro"];
+const SPECIES_OPTIONS = [
+  { label: "Perro", value: "dog" },
+  { label: "Gato", value: "cat" },
+  { label: "Conejo", value: "rabbit" },
+  { label: "Ave", value: "bird" },
+  { label: "Otro", value: "other" },
+];  
 const SIZE_OPTIONS = ["Pequeño", "Mediano", "Grande"];
 
 const CreatePetPage = () => {
@@ -30,7 +36,7 @@ const CreatePetPage = () => {
       await PetsService.createPet({
         shelter_id: user?.shelter_id ?? "29f6c1a2-0b4f-4561-ae65-8c3664096385",
         name,
-        species: species.toLowerCase(),
+        species: species,
         breed,
         age: Number(age),
         size: size.toLowerCase(),
@@ -94,20 +100,16 @@ const CreatePetPage = () => {
           {/* Especie */}
           <Field label="Especie *">
             <div className="flex flex-wrap gap-2">
-              {SPECIES_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setSpecies(s)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold border transition-colors ${
-                    species === s
-                      ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
-                      : "border-gray-200 text-gray-400 hover:border-pink-300 hover:text-pink-500"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+             {SPECIES_OPTIONS.map((s) => (
+         <button
+    key={s.value}
+    type="button"
+    onClick={() => setSpecies(s.value)}  
+    className={`... ${species === s.value ? "bg-pink-500 ..." : "..."}`}
+  >
+    {s.label}  
+  </button>
+))}
             </div>
           </Field>
 

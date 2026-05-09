@@ -46,18 +46,15 @@ export const PetsProvider = ({
     fetchPets();
   }, []);
 
-  const filteredPets = useMemo(() => {
-    return pets.filter((pet) => {
-      if (
-        speciesFilter &&
-        pet.species !== speciesFilter
-      ) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [pets, speciesFilter]);
+ const filteredPets = useMemo(() => {
+  return pets.filter((pet) => {
+    if (speciesFilter && 
+        pet.species.toLowerCase() !== speciesFilter.toLowerCase()) {
+      return false;
+    }
+    return true;
+  });
+}, [pets, speciesFilter]);
 
   return (
     <PetsContext.Provider
