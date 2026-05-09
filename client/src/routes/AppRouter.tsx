@@ -3,13 +3,13 @@ import { Suspense, lazy } from 'react'
 import ProtectedRoute from './ProtectedRoute'
 import RoleProtectedRoute from './RoleProtectedRoute'
 
-// Lazy loading para code splitting
+
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
 const ProfilePage = lazy(() => import('../pages/shared/ProfilePage'))
 const UnauthorizedPage = lazy(() => import('../pages/shared/UnauthorizedPage'))
 
-// Placeholders — los completarán las otras personas
+
 const PetsListPage = lazy(() => import('../pages/adopter/PetsListPage'))
 const ShelterDashboard = lazy(() => import('../pages/shelter/ShelterDashboard'))
 
