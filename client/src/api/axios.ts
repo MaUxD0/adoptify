@@ -12,7 +12,10 @@ axiosInstance.interceptors.request.use(async (config) => {
   } = await supabase.auth.getSession()
 
   if (session?.access_token) {
-    config.headers.Authorization = `Bearer ${session.access_token}`
+    config.headers = {
+      ...config.headers,
+      Authorization: `Bearer ${session.access_token}`,
+    }
   }
 
   return config
