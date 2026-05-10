@@ -222,7 +222,7 @@ const ShelterDashboardPage = () => {
           <NavBtn icon="dashboard" label="Dashboard" active onClick={() => navigate("/shelter/dashboard")} />
           <NavBtn icon="requests" label="Solicitudes" onClick={() => navigate("/shelter/requests")} />
           <NavBtn icon="add" label="Publicar" onClick={() => navigate("/shelter/create-pet")} />
-          <NavBtn icon="profile" label="Perfil" onClick={() => {}} />
+          <NavBtn icon="profile" label="Perfil" onClick={() => navigate("/profile")} />
         </div>
       </nav>
     </div>

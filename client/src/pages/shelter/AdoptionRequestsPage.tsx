@@ -303,7 +303,7 @@ const AdoptionRequestsPage = () => {
           <NavBtn icon="dashboard" label="Dashboard" onClick={() => navigate("/shelter/dashboard")} />
           <NavBtn icon="requests" label="Solicitudes" active onClick={() => navigate("/shelter/requests")} />
           <NavBtn icon="add" label="Publicar" onClick={() => navigate("/shelter/create-pet")} />
-          <NavBtn icon="profile" label="Perfil" onClick={() => {}} />
+          <NavBtn icon="profile" label="Perfil" onClick={() => navigate("/profile")} />
         </div>
       </nav>
     </div>

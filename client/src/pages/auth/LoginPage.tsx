@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuth } from '../../hooks/useAuth'
 import { useNavigate, Link } from 'react-router-dom'
+import { type UserRole } from '../../types/auth.types'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800&q=80'
 
@@ -23,7 +24,7 @@ const LoginPage = () => {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data)
-      navigate('/home')
+      navigate('/')
     } catch { /* error en context */ }
   }
 

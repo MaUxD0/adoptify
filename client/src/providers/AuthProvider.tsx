@@ -11,11 +11,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        const role = (session.user.user_metadata?.role ?? "ADOPTER").toUpperCase() as User['role'];
         const mappedUser: User = {
           id: session.user.id,
           email: session.user.email!,
           full_name: session.user.user_metadata?.full_name ?? "",
-          role: (session.user.user_metadata?.role ?? "ADOPTER").toUpperCase() as User['role'],
+          role,
+          shelter_id: role === 'SHELTER' ? (session.user.user_metadata?.shelter_id ?? session.user.id) : undefined,
           avatar_url: session.user.user_metadata?.avatar_url,
           created_at: session.user.created_at,
         };

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { usersService } from '../../services/users.service'
@@ -13,6 +13,7 @@ const ProfilePage = () => {
 
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
   const [success, setSuccess] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url ?? '')
@@ -21,7 +22,29 @@ const ProfilePage = () => {
     phone: '',
     city: '',
     bio: '',
+    shelter_id: '',
   })
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await usersService.getMyProfile()
+        setFormData({
+          full_name: profile.full_name || '',
+          phone: profile.phone || '',
+          city: profile.city || '',
+          bio: profile.bio || '',
+          shelter_id: profile.shelter_id || '',
+        })
+        if (profile.avatar_url) setAvatarUrl(profile.avatar_url)
+      } catch (err) {
+        console.error('Error fetching profile:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProfile()
+  }, [])
 
   const initials = user?.full_name
     ?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) ?? '?'
@@ -157,7 +180,7 @@ const ProfilePage = () => {
               {[
                 { icon: '📞', label: 'Phone', value: formData.phone || 'Not specified' },
                 { icon: '📍', label: 'City', value: formData.city || 'Not specified' },
-                { icon: '📝', label: 'About me', value: formData.bio || 'No description yet' },
+                { icon: user.role === 'SHELTER' ? '🏠' : '📝', label: user.role === 'SHELTER' ? 'Shelter ID' : 'About me', value: (user.role === 'SHELTER' ? formData.shelter_id : formData.bio) || 'Not specified' },
               ].map(({ icon, label, value }) => (
                 <div key={label} className="flex gap-3 items-start">
                   <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
@@ -169,6 +192,17 @@ const ProfilePage = () => {
                   </div>
                 </div>
               ))}
+              {user.role === 'SHELTER' && formData.bio && (
+                <div className="flex gap-3 items-start">
+                  <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
+                    📝
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Description</p>
+                    <p className="text-sm text-gray-700 mt-0.5">{formData.bio}</p>
+                  </div>
+                </div>
+              )}
             </div>
             <button
               onClick={() => setEditing(true)}
@@ -180,7 +214,7 @@ const ProfilePage = () => {
         ) : (
           <div className="space-y-4">
             {[
-              { key: 'full_name' as const, label: 'Full name', type: 'text', placeholder: 'Your name' },
+              { key: 'full_name' as const, label: user.role === 'SHELTER' ? 'Shelter name' : 'Full name', type: 'text', placeholder: 'Your name' },
               { key: 'phone' as const, label: 'Phone', type: 'tel', placeholder: '+57 300 000 0000' },
               { key: 'city' as const, label: 'City', type: 'text', placeholder: 'Cali, Colombia' },
             ].map(({ key, label, type, placeholder }) => (
@@ -197,9 +231,23 @@ const ProfilePage = () => {
                 />
               </div>
             ))}
+            {user.role === 'SHELTER' && (
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                  Shelter ID
+                </label>
+                <input
+                  type="text"
+                  value={formData.shelter_id}
+                  onChange={e => setFormData(p => ({ ...p, shelter_id: e.target.value }))}
+                  placeholder="29f6c1a2-..."
+                  className="w-full border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition"
+                />
+              </div>
+            )}
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">
-                About me
+                {user.role === 'SHELTER' ? 'Shelter Description' : 'About me'}
               </label>
               <textarea
                 value={formData.bio}
@@ -230,14 +278,17 @@ const ProfilePage = () => {
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 px-4 pb-safe">
         <div className="max-w-md mx-auto flex items-center justify-around py-2 relative">
           <div className="absolute left-1/2 -translate-x-1/2 -top-6">
-            <button className="w-12 h-12 bg-pink-500 hover:bg-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-pink-300 transition-all active:scale-95">
+            <button
+              onClick={() => navigate(user.role === 'SHELTER' ? '/shelter/requests' : '/applications')}
+              className="w-12 h-12 bg-pink-500 hover:bg-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-pink-300 transition-all active:scale-95"
+            >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
             </button>
           </div>
           {[
-            { icon: 'home', label: 'Home', action: () => navigate('/home') },
+            { icon: 'home', label: user.role === 'SHELTER' ? 'Dashboard' : 'Home', action: () => navigate(user.role === 'SHELTER' ? '/shelter/dashboard' : '/home') },
             { icon: 'search', label: 'Search', action: () => {} },
           ].map(({ icon, label, action }) => (
             <button key={label} onClick={action} className="flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400 hover:text-gray-600 transition-colors">
@@ -249,7 +300,7 @@ const ProfilePage = () => {
           ))}
           <div className="w-12" />
           {[
-            { icon: 'heart', label: 'Applications', action: () => navigate('/applications') },
+            { icon: 'heart', label: user.role === 'SHELTER' ? 'Requests' : 'Applications', action: () => navigate(user.role === 'SHELTER' ? '/shelter/requests' : '/applications') },
             { icon: 'user', label: 'Profile', action: () => navigate('/profile'), active: true },
           ].map(({ icon, label, action, active }) => (
             <button key={label} onClick={action} className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors ${active ? 'text-pink-500' : 'text-gray-400 hover:text-gray-600'}`}>
