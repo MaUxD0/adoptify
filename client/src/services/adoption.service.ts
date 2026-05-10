@@ -1,35 +1,46 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API = "http://localhost:5000/api";
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api',
+});
+
+// Adjunta el token de Supabase automáticamente
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
 export const adoptionService = {
-  async createAdoption(dto: any) {
-    const { data } = await axios.post(`${API}/adoptions`, dto);
+  // El backend saca el adopterId del token — no va en la URL
+  async getAdopterAdoptions(_adopterId: string) {
+    const { data } = await api.get('/adoptions/me');
     return data;
   },
 
-  async getAdopterAdoptions(adopterId: string) {
-    const { data } = await axios.get(`${API}/adoptions/adopter/${adopterId}`);
+  // El backend saca el shelterId del token — no va en la URL
+  async getShelterAdoptions(_shelterId: string) {
+    const { data } = await api.get('/adoptions/shelter');
     return data;
   },
 
-  async getShelterAdoptions(shelterId: string) {
-    const { data } = await axios.get(`${API}/adoptions/shelter/${shelterId}`);
+  async createAdoption(dto: unknown) {
+    const { data } = await api.post('/adoptions', dto);
     return data;
   },
 
   async approveAdoption(id: string, notes?: string) {
-    const { data } = await axios.patch(`${API}/adoptions/${id}/approve`, { notes });
+    const { data } = await api.patch(`/adoptions/${id}/approve`, { notes });
     return data;
   },
 
   async rejectAdoption(id: string, notes?: string) {
-    const { data } = await axios.patch(`${API}/adoptions/${id}/reject`, { notes });
+    const { data } = await api.patch(`/adoptions/${id}/reject`, { notes });
     return data;
   },
 
   async getAdoptionById(id: string) {
-    const { data } = await axios.get(`${API}/adoptions/${id}`);
+    const { data } = await api.get(`/adoptions/${id}`);
     return data;
   },
 };
