@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios, { AxiosHeaders } from 'axios'
 import { supabase } from '../api/supabase'
 
 const axiosInstance = axios.create({
@@ -12,10 +12,9 @@ axiosInstance.interceptors.request.use(async (config) => {
   } = await supabase.auth.getSession()
 
   if (session?.access_token) {
-    config.headers = {
-      ...config.headers,
-      Authorization: `Bearer ${session.access_token}`,
-    }
+    const headers = new AxiosHeaders(config.headers ?? {})
+    headers.set('Authorization', `Bearer ${session.access_token}`)
+    config.headers = headers
   }
 
   return config
