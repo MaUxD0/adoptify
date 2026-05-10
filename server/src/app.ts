@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import jwt from 'jsonwebtoken'
 import { errorMiddleware } from './middlewares/error.middleware'
 import authRoutes from './modules/auth/auth.routes'
 import usersRoutes from './modules/users/users.routes'
@@ -22,6 +23,17 @@ app.use('/api/adoptions', adoptionsRouter)
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })
 })
+
+// DEV ONLY — borrar cuando auth esté integrado
+app.post('/api/dev/login', (req, res) => {
+  const { role = 'ADOPTER' } = req.body;
+  const token = jwt.sign(
+    { id: '00000000-0000-0000-0000-000000000001', email: 'dev@test.com', role },
+    process.env.JWT_SECRET!,
+    { expiresIn: '24h' }
+  );
+  res.json({ token });
+});
 
 app.use(errorMiddleware)  
 

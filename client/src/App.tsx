@@ -1,44 +1,27 @@
-import { useAuth } from './hooks/useAuth'
+import { Toaster } from 'react-hot-toast';
+import { AdoptionProvider } from './providers/AdoptionProvider';
+import { ChatProvider } from './providers/ChatProvider';
+import AppRouter from './routes/AppRouter';
 
-// Adopter
-import HomePage from './pages/adopter/HomePage'
-import PetDetailsPage from './pages/adopter/PetDetailsPage'
-
-// Shelter
-import ShelterDashboardPage from './pages/shelter/ShelterDashboardPage'
-import CreatePetPage from './pages/shelter/CreatePetPage'
-import EditPetPage from './pages/shelter/EditPetPage'
-import AdoptionRequestsPage from './pages/shelter/AdoptionRequestsPage'
-
-import { Routes, Route, Navigate } from 'react-router-dom'
-import LoginPage from './pages/auth/LoginPage'
-import RegisterPage from './pages/auth/RegisterPage'
-
-function App() {
-  const { user, loading } = useAuth()
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-400 text-sm">Cargando...</p>
-      </div>
-    )
-  }
-
-  const isShelter = user?.role === 'shelter'
-
+export default function App() {
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={user ? <Navigate to="/" replace /> : <LoginPage />}
-      />
-      <Route
-        path="/register"
-        element={user ? <Navigate to="/" replace /> : <RegisterPage />}
-      />
-
-      <Route
+    <AdoptionProvider>
+      <ChatProvider>
+        <AppRouter />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              borderRadius: '8px',
+              fontFamily: 'inherit',
+            },
+          }}
+        />
+      </ChatProvider>
+    </AdoptionProvider>
+  );
+}
         path="/"
         element={
           !user ? (
@@ -80,3 +63,22 @@ function App() {
 
 export default App
 
+=======
+    <AdoptionProvider>
+      <ChatProvider>
+        <AppRouter />
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              borderRadius: '8px',
+              fontFamily: 'inherit',
+            },
+          }}
+        />
+      </ChatProvider>
+    </AdoptionProvider>
+  );
+}
+>>>>>>> d165608 (feat: adoptions frontend working + dev login endpoint)
