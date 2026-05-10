@@ -6,6 +6,24 @@ interface AuthRequest extends Request {
   user?: any;
 }
 
+function getParamId(req: AuthRequest, param = 'id'): string {
+  const val = req.params[param];
+
+  if (!val) {
+    throw new Error(`Missing route param: ${param}`);
+  }
+
+  if (Array.isArray(val)) {
+    if (!val[0]) {
+      throw new Error(`Missing route param: ${param}`);
+    }
+
+    return val[0];
+  }
+
+  return val;
+}
+
 export const adoptionsController = {
   async createAdoption(req: AuthRequest, res: Response, next: NextFunction) {
     try {
@@ -14,7 +32,7 @@ export const adoptionsController = {
       res.status(201).json({ success: true, data: adoption });
     } catch (error) {
       if (error instanceof AdoptionConflictError) {
-        return res.status(409).json({ success: false, message: error.message });
+        return res.status(409).json({ success: false, message: (error as Error).message });
       }
       next(error);
     }
@@ -44,15 +62,15 @@ export const adoptionsController = {
 
   async getAdoptionById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const adoptionId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const adoptionId = getParamId(req);
       const adoption = await adoptionsService.getAdoptionById(adoptionId, req.user!.id);
       res.json({ success: true, data: adoption });
     } catch (error) {
       if (error instanceof AdoptionNotFoundError) {
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: (error as Error).message });
       }
       if (error instanceof AdoptionForbiddenError) {
-        return res.status(403).json({ success: false, message: error.message });
+        return res.status(403).json({ success: false, message: (error as Error).message });
       }
       next(error);
     }
@@ -60,7 +78,7 @@ export const adoptionsController = {
 
   async approveAdoption(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const adoptionId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const adoptionId = getParamId(req);
       const adoption = await adoptionsService.approveAdoption(
         adoptionId,
         req.user!.id,
@@ -69,10 +87,10 @@ export const adoptionsController = {
       res.json({ success: true, data: adoption });
     } catch (error) {
       if (error instanceof AdoptionNotFoundError) {
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: (error as Error).message });
       }
       if (error instanceof AdoptionForbiddenError) {
-        return res.status(403).json({ success: false, message: error.message });
+        return res.status(403).json({ success: false, message: (error as Error).message });
       }
       next(error);
     }
@@ -80,7 +98,7 @@ export const adoptionsController = {
 
   async rejectAdoption(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const adoptionId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+      const adoptionId = getParamId(req);
       const adoption = await adoptionsService.rejectAdoption(
         adoptionId,
         req.user!.id,
@@ -89,10 +107,10 @@ export const adoptionsController = {
       res.json({ success: true, data: adoption });
     } catch (error) {
       if (error instanceof AdoptionNotFoundError) {
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: (error as Error).message });
       }
       if (error instanceof AdoptionForbiddenError) {
-        return res.status(403).json({ success: false, message: error.message });
+        return res.status(403).json({ success: false, message: (error as Error).message });
       }
       next(error);
     }

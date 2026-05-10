@@ -6,11 +6,11 @@ import {
   conversationIdParamSchema,
   messagesPaginationSchema,
 } from './chat.validators';
-import { authenticate } from '../../middlewares/auth.middleware';
+import { authMiddleware } from '../../middlewares/auth.middleware';
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authMiddleware);
 
 /**
  * GET /api/chat/conversations

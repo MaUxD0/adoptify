@@ -25,22 +25,55 @@ export const authMiddleware = async (
   const token = authHeader.split(' ')[1]
 
   try {
-    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token)
 
     if (error || !user) {
       res.status(401).json({ error: 'Token inválido o expirado' })
       return
     }
 
+    const role = user.user_metadata?.role?.toUpperCase() ?? 'ADOPTER'
+
+    // ✅ CREAR USER EN TABLA users SI NO EXISTE
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    if (!existingUser) {
+      const { error: insertError } = await supabaseAdmin
+        .from('users')
+        .insert([
+          {
+            id: user.id,
+            name: user.user_metadata?.full_name ?? 'Usuario',
+            email: user.email,
+            password: 'supabase-auth-user',
+            role,
+          },
+        ])
+
+      if (insertError) {
+        console.error('ERROR INSERT USER:', insertError)
+      } else {
+        console.log('USER CREATED IN users TABLE')
+      }
+    }
+
     req.user = {
       id: user.id,
       email: user.email!,
-      role: user.user_metadata?.role ?? 'adopter',
+      role,
       full_name: user.user_metadata?.full_name ?? '',
     }
 
     next()
-  } catch {
+  } catch (err) {
+    console.error(err)
     res.status(401).json({ error: 'Error al verificar token' })
   }
 }

@@ -18,42 +18,36 @@ export const AuthProvider = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // ✅ FIX PRINCIPAL: onAuthStateChange como ÚNICA fuente de verdad.
-    //
-    // Supabase dispara el evento INITIAL_SESSION automáticamente al montar,
-    // con la sesión guardada en localStorage — sin llamada remota al servidor.
-    //
-    // El bug original tenía DOS problemas:
-    //   1. loadSession() + onAuthStateChange corriendo en paralelo
-    //   2. getCurrentUser() hacía supabase.auth.getUser() que valida el token
-    //      remotamente — y esa llamada se bloqueaba por los errores de Amplitude
-    //      en el SDK interno de Supabase, dejando loading=true para siempre.
-    //
-    // La solución: callback SÍNCRONO que lee los datos del session local
-    // directamente, sin ningún await que pueda bloquearse.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
-        // Leemos user_metadata directamente del objeto session (local, sin red)
         const mappedUser: User = {
           id: session.user.id,
           email: session.user.email!,
           full_name: session.user.user_metadata?.full_name ?? "",
-          role: session.user.user_metadata?.role ?? "adopter",
+          role: session.user.user_metadata?.role ?? "ADOPTER",
           avatar_url: session.user.user_metadata?.avatar_url,
           created_at: session.user.created_at,
         };
 
         setUser(mappedUser);
+
+        // ✅ Guardar token
         localStorage.setItem("token", session.access_token);
+
+        // ✅ IMPORTANTE: guardar user completo
+        localStorage.setItem("user", JSON.stringify(mappedUser));
+
+        console.log("USER SAVED:", mappedUser);
+        console.log("TOKEN SAVED:", session.access_token);
       } else {
         setUser(null);
+
         localStorage.removeItem("token");
         localStorage.removeItem("user");
       }
 
-      // ✅ Siempre se ejecuta — no hay async que pueda colgarse
       setLoading(false);
     });
 
@@ -67,18 +61,23 @@ export const AuthProvider = ({
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      const { data: authData, error } =
+        await supabase.auth.signInWithPassword({
+          email: data.email.trim(),
+          password: data.password,
+        });
+
+      console.log("LOGIN RESPONSE:", authData);
+      console.log("LOGIN ERROR:", error);
+
       if (error) throw error;
-      // ✅ En éxito NO hacemos setLoading(false) aquí:
-      // onAuthStateChange lo hará al recibir el evento SIGNED_IN
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : "Error al iniciar sesión";
+
       setError(msg);
-      setLoading(false); // Solo en error, porque onAuthStateChange no se dispara
+      setLoading(false);
+
       throw err;
     }
   };
@@ -92,23 +91,32 @@ export const AuthProvider = ({
         email: data.email,
         password: data.password,
         options: {
-          data: { full_name: data.full_name, role: data.role },
+          data: {
+            full_name: data.full_name,
+            role: data.role,
+          },
         },
       });
+
       if (error) throw error;
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : "Error al registrarse";
+
       setError(msg);
       setLoading(false);
+
       throw err;
     }
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
+
     setUser(null);
-    // onAuthStateChange recibirá SIGNED_OUT y limpiará localStorage
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (

@@ -1,20 +1,22 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useAdoptions } from '../../hooks/useAdoptions';
-import { useChat } from '../../hooks/useChat';
+import { useConversations, useChat } from '../../hooks/useChat';
 import { AdoptionCard } from '../../components/adoptions/AdoptionCard';
 import { ChatWindow } from '../../components/chat/ChatWindow';
 import type { AdoptionStatus } from '../../types/adoption.types';
+import { AuthContext } from '../../contexts/AuthContext';
 
-// TODO: Replace with real auth context value once auth module is integrated
-const CURRENT_USER_ID = 'REPLACE_WITH_AUTH_CONTEXT';
-
-export function MyApplications() {
+function MyApplications() {
   const [statusFilter, setStatusFilter] = useState<AdoptionStatus | undefined>(undefined);
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
 
   const { adoptions, pagination, isLoading, error } = useAdoptions({
     status: statusFilter,
     limit: 12,
   });
+
+  const { conversations, open, close } = useConversations();
 
   const {
     conversation,
@@ -24,8 +26,23 @@ export function MyApplications() {
     isSending,
     send,
     loadMore,
-    close,
+    close: closeChat,
   } = useChat();
+
+  const handleChat = (adoptionId: string) => {
+    // Find conversation related to this adoption
+    // For now, assume conversations are linked by some field, or create/open one
+    // This is a simplified implementation - in reality you'd need to link conversations to adoptions
+    const conversation = conversations.find(c => c.pet_id === adoptionId);
+    if (conversation) {
+      open(conversation.id);
+    }
+  };
+
+  const handleCloseChat = () => {
+    closeChat();
+    close(); // Close from conversations
+  };
 
   return (
     <main className="my-applications">
@@ -71,6 +88,7 @@ export function MyApplications() {
               key={adoption.id}
               adoption={adoption}
               viewMode="adopter"
+              onChat={handleChat}
             />
           ))}
         </div>
@@ -83,7 +101,7 @@ export function MyApplications() {
         </p>
       )}
 
-      {/* Inline chat panel (slides in when conversation is opened) */}
+      {/* Inline chat panel */}
       {conversation && (
         <div className="chat-panel-overlay">
           <ChatWindow
@@ -91,14 +109,16 @@ export function MyApplications() {
             hasMore={hasMore}
             isLoading={messagesLoading}
             isSending={isSending}
-            currentUserId={CURRENT_USER_ID}
+            currentUserId={user?.id || ''}
             conversationTitle="Chat with Shelter"
             onSend={send}
             onLoadMore={loadMore}
-            onClose={close}
+            onClose={handleCloseChat}
           />
         </div>
       )}
     </main>
   );
 }
+
+export default MyApplications;

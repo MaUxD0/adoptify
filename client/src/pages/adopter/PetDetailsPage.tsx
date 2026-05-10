@@ -1,8 +1,12 @@
 
 import { useNavigate, useParams } from "react-router-dom";
+import { useContext } from "react";
 import { usePets } from "../../hooks/usePets";
 import { PetsService } from "../../services/pets.service";
 import Footer from "../../components/pet/Footer";
+import { adoptionService } from "../../services/adoption.service";
+import { AuthContext } from "../../contexts/AuthContext";
+import toast from "react-hot-toast";
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80";
 
@@ -13,7 +17,35 @@ const PetDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { pets } = usePets();
+  const authContext = useContext(AuthContext);
+  const user = authContext?.user;
   const pet = pets.find((p) => p.id === id);
+
+  const handleAdopt = async () => {
+  try {
+    console.log("PET COMPLETA:", pet);
+    console.log("PET ID:", pet?.id);
+
+    if (!pet?.id) {
+      alert("La mascota no tiene ID");
+      return;
+    }
+
+    const response = await adoptionService.createAdoption({
+      petId: pet.id,
+      message: "Quiero adoptar esta mascota",
+    });
+
+    console.log("ADOPTION RESPONSE:", response);
+
+    alert("Solicitud enviada");
+  } catch (error: any) {
+    console.error(
+      "ERROR BACKEND:",
+      error?.response?.data || error
+    );
+  }
+};
 
   const handleDelete = async () => {
     if (!id) return;
@@ -158,9 +190,12 @@ const PetDetailsPage = () => {
         </div>
 
         {/* ── ADOPT BUTTON ── */}
-        <button className="w-full bg-pink-500 hover:bg-pink-600 active:scale-[0.98] text-white font-bold text-base py-4 rounded-full shadow-lg shadow-pink-200 transition-all mb-4">
-          Adopt {pet.name}
-        </button>
+       <button
+  onClick={handleAdopt}
+  className="w-full bg-pink-500 hover:bg-pink-600 active:scale-[0.98] text-white font-bold text-base py-4 rounded-full shadow-lg shadow-pink-200 transition-all mb-4"
+>
+  Adopt {pet.name}
+</button>
 
         {/* Delete (admin action, subtle) */}
         <button

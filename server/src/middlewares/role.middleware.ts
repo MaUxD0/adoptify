@@ -7,10 +7,18 @@ export const requireRole = (...roles: string[]) => {
       res.status(401).json({ error: 'No autenticado' })
       return
     }
-    if (!roles.includes(req.user.role)) {
-      res.status(403).json({ error: 'No tienes permiso para esta acción' })
+
+    const userRole = req.user.role.toUpperCase()
+
+    const allowedRoles = roles.map((role) => role.toUpperCase())
+
+    if (!allowedRoles.includes(userRole)) {
+      res.status(403).json({
+        error: 'No tienes permiso para esta acción',
+      })
       return
     }
+
     next()
   }
 }

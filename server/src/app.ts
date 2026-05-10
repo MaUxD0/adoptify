@@ -6,6 +6,7 @@ import authRoutes from './modules/auth/auth.routes'
 import usersRoutes from './modules/users/users.routes'
 import petsRoutes from "./modules/pets/pets.routes"
 import adoptionsRouter from './modules/adoptions/adoptions.routes'
+import chatRouter from './modules/chat/chat.routes'
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/pets', petsRoutes)
 app.use('/api/adoptions', adoptionsRouter)
+app.use('/api/chat', chatRouter)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() })

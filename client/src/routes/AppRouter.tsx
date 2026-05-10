@@ -10,6 +10,10 @@ const ProfilePage = lazy(() => import('../pages/shared/ProfilePage'))
 const UnauthorizedPage = lazy(() => import('../pages/shared/UnauthorizedPage'))
 
 const PetsListPage = lazy(() => import('../pages/adopter/PetsListPage'))
+const HomePage = lazy(() => import('../pages/adopter/HomePage'))
+const MyApplications = lazy(() => import('../pages/adopter/MyApplications'))
+const PetDetailsPage = lazy(() => import('../pages/adopter/PetDetailsPage'))
+
 const ShelterDashboard = lazy(() => import('../pages/shelter/ShelterDashboard'))
 
 const LoadingFallback = () => (
@@ -31,15 +35,18 @@ const AppRouter = () => {
         </Route>
 
         <Route element={<RoleProtectedRoute allowedRoles={['adopter']} />}>
-          <Route path="/pets" element={<PetsListPage />} />
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/dashboard" element={<PetsListPage />} />
+          <Route path="/applications" element={<MyApplications />} />
+          <Route path="/pets/:id" element={<PetDetailsPage />} />
         </Route>
 
         <Route element={<RoleProtectedRoute allowedRoles={['shelter']} />}>
           <Route path="/shelter" element={<ShelterDashboard />} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/pets" replace />} />
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Suspense>
@@ -47,4 +54,3 @@ const AppRouter = () => {
 }
 
 export default AppRouter
-

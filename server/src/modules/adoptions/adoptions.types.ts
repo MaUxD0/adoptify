@@ -21,9 +21,9 @@ export interface UpdateAdoptionStatusDto {
 }
 
 export interface AdoptionFilters {
-  status?: AdoptionStatus;
-  page?: number;
-  limit?: number;
+  status?: AdoptionStatus | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
 }
 
 export interface PaginatedResult<T> {

@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
+import type { AuthRequest } from '../../middlewares/auth.middleware';
 import { chatService, ConversationNotFoundError, ConversationForbiddenError } from './chat.service';
 
 export const chatController = {
-  async getConversations(req: Request, res: Response, next: NextFunction) {
+  async getConversations(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const conversations = await chatService.getUserConversations(req.user!.id);
       res.json({ success: true, data: conversations });
@@ -11,7 +12,7 @@ export const chatController = {
     }
   },
 
-  async getConversationById(req: Request, res: Response, next: NextFunction) {
+  async getConversationById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const conversation = await chatService.getConversationById(
         req.params.conversationId as string,
@@ -29,7 +30,7 @@ export const chatController = {
     }
   },
 
-  async getMessages(req: Request, res: Response, next: NextFunction) {
+  async getMessages(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const conversationId = req.params.conversationId as string;
       const page = Number(req.query.page ?? 1);
@@ -50,13 +51,14 @@ export const chatController = {
     }
   },
 
-  async sendMessage(req: Request, res: Response, next: NextFunction) {
+  async sendMessage(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const conversationId = req.params.conversationId as string;
+      const { content } = req.body as { content: string };
       const message = await chatService.sendMessage(
         conversationId,
         req.user!.id,
-        req.body.content,
+        content,
       );
       res.status(201).json({ success: true, data: message });
     } catch (error) {
