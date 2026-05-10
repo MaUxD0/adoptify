@@ -1,120 +1,140 @@
-import { CreateAdoptionDto, AdoptionFilters, AdoptionStatuses, PaginatedResult } from './adoptions.types';
+import { supabase } from "../../config/supabase";
 
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
-const adoptionSelect = {
-  id: true,
-  petId: true,
-  adopterId: true,
-  shelterId: true,
-  status: true,
-  message: true,
-  notes: true,
-  createdAt: true,
-  updatedAt: true,
-  pet: {
-    select: {
-      id: true,
-      name: true,
-      species: true,
-      breed: true,
-      imageUrl: true,
-    },
-  },
-  adopter: {
-    select: { id: true, name: true, email: true },
-  },
-  shelter: {
-    select: { id: true, name: true, email: true },
-  },
-} as const;
+import {
+  CreateAdoptionDto,
+  AdoptionFilters,
+  AdoptionStatuses,
+} from "./adoptions.types";
 
 export const adoptionsRepository = {
-  async create(data: CreateAdoptionDto & { adopterId: string }): Promise<{ id: string; [key: string]: unknown }> {
-    return prisma.adoption.create({
-      data: {
-        petId: data.petId,
-        adopterId: data.adopterId,
-        shelterId: data.shelterId,
-        message: data.message,
-        status: AdoptionStatuses.PENDING,
-      },
-      include: {
-        pet: { select: { id: true, name: true, species: true, breed: true, imageUrl: true } },
-        adopter: { select: { id: true, name: true, email: true } },
-        shelter: { select: { id: true, name: true, email: true } },
-      },
-    });
+  async create(
+    data: CreateAdoptionDto & {
+      adopterId: string;
+    }
+  ) {
+    const { data: adoption, error } = await supabase
+      .from("adoption_requests")
+      .insert([
+        {
+          pet_id: data.petId,
+          adopter_id: data.adopterId,
+          message: data.message,
+          status: AdoptionStatuses.PENDING,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return adoption;
   },
 
   async findById(id: string) {
-    return prisma.adoption.findUnique({
-      where: { id },
-      select: adoptionSelect,
-    });
+    const { data, error } = await supabase
+      .from("adoption_requests")
+      .select(`
+        *,
+        pets (
+          shelter_id
+        )
+      `)
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+
+    return data;
   },
 
   async findByAdopter(
     adopterId: string,
-    filters: AdoptionFilters,
-  ): Promise<PaginatedResult<(typeof adoptionSelect extends { [K: string]: unknown } ? unknown : never)>> {
-    const { status, page = 1, limit = 10 } = filters;
-    const skip = (page - 1) * limit;
-    const where = { adopterId, ...(status && { status }) };
+    filters: AdoptionFilters
+  ) {
+    let query = supabase
+      .from("adoption_requests")
+      .select("*")
+      .eq("adopter_id", adopterId);
 
-    const [data, total] = await Promise.all([
-      prisma.adoption.findMany({
-        where,
-        select: adoptionSelect,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.adoption.count({ where }),
-    ]);
+    if (filters.status) {
+      query = query.eq("status", filters.status);
+    }
 
-    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return {
+      data,
+      total: data.length,
+      page: filters.page || 1,
+      limit: filters.limit || 10,
+      totalPages: 1,
+    };
   },
 
   async findByShelter(
     shelterId: string,
-    filters: AdoptionFilters,
-  ): Promise<PaginatedResult<unknown>> {
-    const { status, page = 1, limit = 10 } = filters;
-    const skip = (page - 1) * limit;
-    const where = { shelterId, ...(status && { status }) };
+    filters: AdoptionFilters
+  ) {
+    let query = supabase
+      .from("adoption_requests")
+      .select(`
+        *,
+        pets!inner (
+          shelter_id
+        )
+      `)
+      .eq("pets.shelter_id", shelterId);
 
-    const [data, total] = await Promise.all([
-      prisma.adoption.findMany({
-        where,
-        select: adoptionSelect,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.adoption.count({ where }),
-    ]);
+    if (filters.status) {
+      query = query.eq("status", filters.status);
+    }
 
-    return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return {
+      data,
+      total: data.length,
+      page: filters.page || 1,
+      limit: filters.limit || 10,
+      totalPages: 1,
+    };
   },
 
   async updateStatus(
-    id: string,
-    status: typeof AdoptionStatuses.APPROVED | typeof AdoptionStatuses.REJECTED,
-    notes?: string,
-  ) {
-    return prisma.adoption.update({
-      where: { id },
-      data: { status, notes },
-      select: adoptionSelect,
-    });
+  id: string,
+  status: string,
+  notes?: string
+) {
+    const { data, error } = await supabase
+      .from("adoption_requests")
+      .update({
+        status,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return data;
   },
 
-  async existsByPetAndAdopter(petId: string, adopterId: string): Promise<boolean> {
-    const count = await prisma.adoption.count({
-      where: { petId, adopterId, status: { not: AdoptionStatuses.CANCELLED } },
-    });
-    return count > 0;
+  async existsByPetAndAdopter(
+    petId: string,
+    adopterId: string
+  ) {
+    const { data, error } = await supabase
+      .from("adoption_requests")
+      .select("id")
+      .eq("pet_id", petId)
+      .eq("adopter_id", adopterId);
+
+    if (error) throw error;
+
+    return data.length > 0;
   },
 };

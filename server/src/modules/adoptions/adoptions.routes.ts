@@ -28,8 +28,6 @@ router.get(
   adoptionsController.getMyAdoptions,
 );
 
-
-
 router.get(
   '/shelter',
   requireRole('SHELTER'),
