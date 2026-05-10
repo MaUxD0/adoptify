@@ -24,7 +24,6 @@ export function useConversations() {
   };
 }
 
-
 export function useChat() {
   const {
     activeConversation: conversation,
@@ -35,7 +34,6 @@ export function useChat() {
     sendMessage: send,
     loadMoreMessages: loadMore,
     closeConversation: close,
-    openOrCreateConversation,
   } = useChatContext();
 
   return {
@@ -47,13 +45,5 @@ export function useChat() {
     send,
     loadMore,
     close,
-    openOrCreateConversation,
   };
 }
-
-
-//export function useOpenChat() {
- // const { openOrCreateConversation } = useChatContext();
-
-  //return (dto: CreateConversationDto) => openOrCreateConversation(dto);
-//}
