@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import adoptionsRouter from './modules/adoptions/adoptions.routes';
+const chatRouter = require('./modules/chat/chat.routes').default;
 import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
@@ -24,6 +25,7 @@ app.post('/api/dev/login', (req, res) => {
 });
 
 app.use('/api/adoptions', adoptionsRouter);
+app.use('/api/chat', chatRouter);
 
 app.use(errorHandler);
 
