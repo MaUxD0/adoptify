@@ -1,20 +1,22 @@
 export const AdoptionStatuses = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  CANCELLED: 'CANCELLED',
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
 } as const;
 
-export type AdoptionStatus = (typeof AdoptionStatuses)[keyof typeof AdoptionStatuses];
+export type AdoptionStatus =
+  (typeof AdoptionStatuses)[keyof typeof AdoptionStatuses];
 
 export interface CreateAdoptionDto {
   petId: string;
-  shelterId: string;
   message?: string;
 }
 
 export interface UpdateAdoptionStatusDto {
-  status: typeof AdoptionStatuses.APPROVED | typeof AdoptionStatuses.REJECTED;
+  status:
+    | typeof AdoptionStatuses.APPROVED
+    | typeof AdoptionStatuses.REJECTED;
+
   notes?: string;
 }
 

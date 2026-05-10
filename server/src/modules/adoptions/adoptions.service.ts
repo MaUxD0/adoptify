@@ -44,7 +44,7 @@ export const adoptionsService = {
   async approveAdoption(adoptionId: string, shelterId: string, notes?: string) {
     const adoption = await adoptionsRepository.findById(adoptionId);
     if (!adoption) throw new AdoptionNotFoundError(adoptionId);
-    if ((adoption as { shelterId: string }).shelterId !== shelterId) {
+    if ((adoption as any).pets.shelter_id !== shelterId) {
       throw new AdoptionForbiddenError('You do not manage this adoption request');
     }
 
@@ -54,7 +54,7 @@ export const adoptionsService = {
   async rejectAdoption(adoptionId: string, shelterId: string, notes?: string) {
     const adoption = await adoptionsRepository.findById(adoptionId);
     if (!adoption) throw new AdoptionNotFoundError(adoptionId);
-    if ((adoption as { shelterId: string }).shelterId !== shelterId) {
+    if ((adoption as any).pets.shelter_id !== shelterId) {
       throw new AdoptionForbiddenError('You do not manage this adoption request');
     }
 
@@ -65,8 +65,12 @@ export const adoptionsService = {
     const adoption = await adoptionsRepository.findById(adoptionId);
     if (!adoption) throw new AdoptionNotFoundError(adoptionId);
 
-    const a = adoption as { adopterId: string; shelterId: string };
-    if (a.adopterId !== requesterId && a.shelterId !== requesterId) {
+    const a = adoption as any;
+
+if (
+  a.adopter_id !== requesterId &&
+  a.pets.shelter_id !== requesterId
+) {
       throw new AdoptionForbiddenError();
     }
 
