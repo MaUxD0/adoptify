@@ -49,7 +49,7 @@ export function AdoptionProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const { data, ...meta } = await adoptionService.getMyAdoptions(filters);
-      setAdoptions(data);
+      setAdoptions(data || []);
       setPagination(meta);
     } catch (err) {
       handleError(err, 'Failed to load your adoption requests');
@@ -63,7 +63,7 @@ export function AdoptionProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const { data, ...meta } = await adoptionService.getShelterAdoptions(filters);
-      setAdoptions(data);
+      setAdoptions(data || []);
       setPagination(meta);
     } catch (err) {
       handleError(err, 'Failed to load shelter requests');

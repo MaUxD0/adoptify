@@ -26,7 +26,10 @@ export const adoptionService = {
       params: filters,
     });
     const { success: _success, ...paginated } = data;
-    return paginated;
+    return {
+      ...paginated,
+      data: paginated.data || [],
+    };
   },
 
   async getShelterAdoptions(filters?: AdoptionFilters): Promise<PaginatedAdoptions> {
@@ -34,7 +37,10 @@ export const adoptionService = {
       params: filters,
     });
     const { success: _success, ...paginated } = data;
-    return paginated;
+    return {
+      ...paginated,
+      data: paginated.data || [],
+    };
   },
 
   async getAdoptionById(id: string): Promise<Adoption> {

@@ -5,7 +5,7 @@ export class PetsService {
     const response =
       await axiosInstance.get("/pets");
 
-    return response.data.data;
+    return response.data.data || [];
   }
 
   static async getPetById(id: string) {
@@ -14,7 +14,7 @@ export class PetsService {
         `/pets/${id}`
       );
 
-    return response.data.data;
+    return response.data.data || null;
   }
 
   static async createPet(

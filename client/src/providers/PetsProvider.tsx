@@ -35,7 +35,7 @@ export const PetsProvider = ({
         const response =
           await PetsService.getAllPets();
 
-        setPets(response);
+        setPets(response || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -47,7 +47,7 @@ export const PetsProvider = ({
   }, []);
 
  const filteredPets = useMemo(() => {
-  return pets.filter((pet) => {
+  return (pets || []).filter((pet) => {
     if (speciesFilter && 
         pet.species.toLowerCase() !== speciesFilter.toLowerCase()) {
       return false;
