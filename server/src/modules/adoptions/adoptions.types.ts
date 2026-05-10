@@ -33,3 +33,16 @@ export interface PaginatedResult<T> {
   limit: number;
   totalPages: number;
 }
+
+export interface Adoption {
+  id: string;
+  pet_id: string;
+  adopter_id: string;
+  status: AdoptionStatus;
+  message?: string;
+  created_at: string;
+  updated_at: string;
+  pets?: {
+    shelter_id: string;
+  };
+}

@@ -57,4 +57,9 @@ export const chatService = {
 
     return conversation;
   },
+
+  async findOrCreateConversation(adopterId: string, shelterId: string) {
+    return chatRepository.findOrCreateConversation(adopterId, shelterId);
+  },
+  
 };

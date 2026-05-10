@@ -12,36 +12,22 @@ const router = Router();
 
 router.use(authMiddleware);
 
-/**
- * GET /api/chat/conversations
- * List all conversations for the authenticated user
- */
 router.get('/conversations', chatController.getConversations);
 
-/**
- * GET /api/chat/conversations/:conversationId
- * Get a single conversation with metadata
- */
+router.post('/conversations', chatController.findOrCreateConversation);
+
 router.get(
   '/conversations/:conversationId',
   validate({ params: conversationIdParamSchema }),
   chatController.getConversationById,
 );
 
-/**
- * GET /api/chat/conversations/:conversationId/messages
- * Paginated messages for a conversation
- */
 router.get(
   '/conversations/:conversationId/messages',
   validate({ params: conversationIdParamSchema, query: messagesPaginationSchema }),
   chatController.getMessages,
 );
 
-/**
- * POST /api/chat/conversations/:conversationId/messages
- * Send a message in a conversation
- */
 router.post(
   '/conversations/:conversationId/messages',
   validate({ params: conversationIdParamSchema, body: sendMessageSchema }),

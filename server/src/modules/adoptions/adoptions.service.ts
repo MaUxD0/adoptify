@@ -1,3 +1,4 @@
+import { chatRepository } from '../chat/chat.repository';
 import { adoptionsRepository } from './adoptions.repository';
 import { CreateAdoptionDto, AdoptionFilters, AdoptionStatuses } from './adoptions.types';
 
@@ -24,11 +25,17 @@ export class AdoptionConflictError extends Error {
 
 export const adoptionsService = {
   async createAdoption(adopterId: string, dto: CreateAdoptionDto) {
-    const alreadyExists = await adoptionsRepository.existsByPetAndAdopter(dto.petId, adopterId);
+    const alreadyExists = await adoptionsRepository.existsByPetAndAdopter(
+      dto.petId,
+      adopterId
+    );
+
     if (alreadyExists) throw new AdoptionConflictError();
 
-    const adoption = await adoptionsRepository.create({ ...dto, adopterId });
-
+    const adoption = await adoptionsRepository.create({
+      ...dto,
+      adopterId,
+    });
 
     return adoption;
   },

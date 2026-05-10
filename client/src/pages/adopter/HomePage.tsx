@@ -33,7 +33,7 @@ const COMMUNITY_MESSAGES = [
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { filteredPets, loading, setSpeciesFilter } = usePets();
+  const { filteredPets, loading } = usePets();
 
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [msgIndex] = useState(() =>
@@ -83,7 +83,7 @@ const HomePage = () => {
       {/* ── HERO ── */}
       <section className="relative h-72 overflow-hidden">
         <img src={HERO_IMG} alt="Shelter animals" className="absolute inset-0 w-full h-full object-cover object-center" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/60" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/60" />
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-8 pb-4">
           <h1 className="text-white text-2xl font-bold leading-snug drop-shadow-lg mb-5">
             Adopt an animal and help
@@ -105,7 +105,7 @@ const HomePage = () => {
         {searchOpen && (
           <div className="px-5 mb-5">
             <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5">
-              <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />
               </svg>
@@ -176,7 +176,7 @@ const HomePage = () => {
         </section>
 
         {/* ── COMMUNITY BANNER ── */}
-        <section className="mx-4 mt-8 bg-pink-500 rounded-3xl overflow-hidden relative min-h-[160px] flex items-center">
+        <section className="mx-4 mt-8 bg-pink-500 rounded-3xl overflow-hidden relative min-h-40 flex items-center">
           <img
             src={COMMUNITY_IMG}
             alt="Community"
@@ -215,7 +215,7 @@ const HomePage = () => {
               Gift
             </button>
           </div>
-          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-pink-100 flex-shrink-0 shadow-md">
+          <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-pink-100 shrink-0 shadow-md">
             <img src={DONATE_IMG} alt="Pet love" className="w-full h-full object-cover" />
           </div>
         </section>
@@ -229,7 +229,7 @@ const HomePage = () => {
         <div className="max-w-md mx-auto flex items-center justify-around py-2 relative">
           <div className="absolute left-1/2 -translate-x-1/2 -top-6">
             <button
-              onClick={() => navigate("/applications")}
+              onClick={() => navigate("/chats")}
               className="w-12 h-12 bg-pink-500 hover:bg-pink-600 rounded-full flex items-center justify-center shadow-lg shadow-pink-300 transition-all active:scale-95"
             >
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -254,7 +254,7 @@ const HomePage = () => {
       {/* ── COMMUNITY MODAL ── */}
       {showCommunityModal && (
         <div
-          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-100 flex items-end justify-center bg-black/50 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) setShowCommunityModal(false) }}
         >
           <div className="bg-white w-full max-w-md rounded-t-3xl px-6 pt-6 pb-10 animate-slide-up">

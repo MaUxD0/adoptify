@@ -52,7 +52,7 @@ const LoginPage = () => {
           alt="Pets waiting for a home"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/70" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-black/70" />
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-8">
           <h1 className="text-white text-2xl font-bold leading-snug drop-shadow-lg">
             Welcome back!
@@ -69,7 +69,7 @@ const LoginPage = () => {
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-2xl mb-5 flex items-center gap-2">
-            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
             {error}

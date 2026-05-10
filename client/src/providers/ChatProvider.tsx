@@ -95,6 +95,7 @@ interface ChatContextValue extends ChatState {
   hasMore: boolean;
   loadConversations: () => Promise<void>;
   openConversation: (id: string) => Promise<void>;
+  openOrCreateConversation: (adopterId: string, shelterId: string) => Promise<string>;
   closeConversation: () => void;
   loadMoreMessages: () => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
@@ -120,6 +121,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       payload: { messages: result.data, total: result.total, page: 1, prepend: false },
     });
   }, []);
+
+  const openOrCreateConversation = useCallback(async (adopterId: string, shelterId: string) => {
+    const conversation = await chatService.findOrCreateConversation(adopterId, shelterId);
+    await openConversation(conversation.id);
+    return conversation.id;
+  }, [openConversation]);
 
   const closeConversation = useCallback(() => {
     dispatch({ type: 'CLOSE' });
@@ -154,6 +161,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       hasMore,
       loadConversations,
       openConversation,
+      openOrCreateConversation,
       closeConversation,
       loadMoreMessages,
       sendMessage,

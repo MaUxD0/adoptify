@@ -95,7 +95,7 @@ const ProfilePage = () => {
       {/* HERO */}
       <section className="relative h-44 overflow-hidden">
         <img src={HERO_IMG} alt="Profile hero" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/30 to-black/60" />
+        <div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/30 to-black/60" />
       </section>
 
       {/* MAIN CARD */}
@@ -163,7 +163,7 @@ const ProfilePage = () => {
                 { icon: '📝', label: 'About me', value: formData.bio || 'No description yet' },
               ].map(({ icon, label, value }) => (
                 <div key={label} className="flex gap-3 items-start">
-                  <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
+                  <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base shrink-0">
                     {icon}
                   </div>
                   <div>

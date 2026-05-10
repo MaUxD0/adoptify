@@ -52,9 +52,14 @@ export const adoptionsRepository = {
     filters: AdoptionFilters
   ) {
     let query = supabase
-      .from("adoption_requests")
-      .select("*")
-      .eq("adopter_id", adopterId);
+  .from("adoption_requests")
+  .select(`
+    *,
+    pets (
+      shelter_id
+    )
+  `)
+  .eq("adopter_id", adopterId);
 
     if (filters.status) {
       query = query.eq("status", filters.status);

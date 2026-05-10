@@ -18,10 +18,10 @@ export const chatRepository = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    return data ?? [];
   },
 
-  async findConversationById(conversationId: string) {
+  async findConversationById(id: string) {
     const { data, error } = await supabase
       .from('chats')
       .select(`
@@ -29,38 +29,35 @@ export const chatRepository = {
         adopter_id,
         shelter_id,
         pet_id,
-        created_at,
-        adopter:users!chats_adopter_id_fkey(id, name),
-        shelter:users!chats_shelter_id_fkey(id, name),
-        pet:pets(id, name)
+        created_at
       `)
-      .eq('id', conversationId)
+      .eq('id', id)
       .maybeSingle();
 
     if (error) throw error;
     return data;
   },
 
-  async isParticipant(conversationId: string, userId: string): Promise<boolean> {
+  async isParticipant(chatId: string, userId: string) {
     const { data, error } = await supabase
       .from('chats')
       .select('id')
-      .eq('id', conversationId)
+      .eq('id', chatId)
       .or(`adopter_id.eq.${userId},shelter_id.eq.${userId}`)
       .maybeSingle();
 
     if (error) throw error;
-    return data !== null;
+    return !!data;
   },
 
-  async getMessages(conversationId: string, page: number, limit: number) {
+  async getMessages(chatId: string, page: number, limit: number) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
     const { data, error, count } = await supabase
       .from('messages')
       .select('*', { count: 'exact' })
-      .eq('chat_id', conversationId)
+      .eq('chat_id', chatId)
       .order('created_at', { ascending: true })
       .range(from, to);
 
@@ -75,10 +72,14 @@ export const chatRepository = {
     };
   },
 
-  async sendMessage(conversationId: string, senderId: string, content: string) {
+  async sendMessage(chatId: string, senderId: string, content: string) {
     const { data, error } = await supabase
       .from('messages')
-      .insert({ chat_id: conversationId, sender_id: senderId, content })
+      .insert({
+        chat_id: chatId,
+        sender_id: senderId,
+        content,
+      })
       .select()
       .single();
 
@@ -86,14 +87,35 @@ export const chatRepository = {
     return data;
   },
 
-  async markMessagesAsRead(conversationId: string, userId: string) {
+  async markMessagesAsRead(chatId: string, userId: string) {
     const { error } = await supabase
       .from('messages')
       .update({ is_read: true })
-      .eq('chat_id', conversationId)
+      .eq('chat_id', chatId)
       .neq('sender_id', userId)
       .eq('is_read', false);
 
     if (error) throw error;
   },
+  
+  async findOrCreateConversation(adopterId: string, shelterId: string) {
+    const { data: existing } = await supabase
+      .from('chats')
+      .select('*')
+      .eq('adopter_id', adopterId)
+      .eq('shelter_id', shelterId)
+      .maybeSingle();
+
+    if (existing) return existing;
+
+    const { data, error } = await supabase
+      .from('chats')
+      .insert({ adopter_id: adopterId, shelter_id: shelterId })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
 };

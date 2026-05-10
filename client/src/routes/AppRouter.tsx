@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 
+
 import ProtectedRoute from './ProtectedRoute'
 import RoleProtectedRoute from './RoleProtectedRoute'
 
@@ -15,6 +16,8 @@ const MyApplications = lazy(() => import('../pages/adopter/MyApplications'))
 const PetDetailsPage = lazy(() => import('../pages/adopter/PetDetailsPage'))
 
 const ShelterDashboard = lazy(() => import('../pages/shelter/ShelterDashboard'))
+const ChatPage = lazy(() => import('../pages/adopter/ChatPage'))
+const ChatsListPage = lazy(() => import('../pages/adopter/ChatListPage'))
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -40,6 +43,9 @@ const AppRouter = () => {
           <Route path="/dashboard" element={<PetsListPage />} />
           <Route path="/applications" element={<MyApplications />} />
           <Route path="/pets/:id" element={<PetDetailsPage />} />
+          <Route path="/chat/:id" element={<ChatPage />} />
+          <Route path="/chats" element={<ChatsListPage />} />
+
         </Route>
 
         <Route element={<RoleProtectedRoute allowedRoles={['shelter']} />}>
