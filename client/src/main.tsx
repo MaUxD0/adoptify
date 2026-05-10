@@ -1,10 +1,23 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import ReactDOM from "react-dom/client"
+import React from "react"
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+import { BrowserRouter } from "react-router-dom"
+
+import App from "./App"
+import "./index.css"
+
+import { PetsProvider } from "./providers/PetsProvider"
+import { AuthProvider } from "./providers/AuthProvider"
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <PetsProvider>
+          <App />
+        </PetsProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
 )
+
