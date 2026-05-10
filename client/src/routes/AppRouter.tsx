@@ -3,6 +3,7 @@ import { Suspense, lazy } from 'react'
 
 import ProtectedRoute from './ProtectedRoute'
 import RoleProtectedRoute from './RoleProtectedRoute'
+import RootRedirect from './RootRedirect'
 
 const LoginPage = lazy(() => import('../pages/auth/LoginPage'))
 const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'))
@@ -15,6 +16,10 @@ const MyApplications = lazy(() => import('../pages/adopter/MyApplications'))
 const PetDetailsPage = lazy(() => import('../pages/adopter/PetDetailsPage'))
 
 const ShelterDashboard = lazy(() => import('../pages/shelter/ShelterDashboard'))
+const ShelterDashboardPage = lazy(() => import('../pages/shelter/ShelterDashboardPage'))
+const CreatePetPage = lazy(() => import('../pages/shelter/CreatePetPage'))
+const EditPetPage = lazy(() => import('../pages/shelter/EditPetPage'))
+const AdoptionRequestsPage = lazy(() => import('../pages/shelter/AdoptionRequestsPage'))
 
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -30,23 +35,31 @@ const AppRouter = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
+        {/* Ruta raíz redirige según el rol */}
+        <Route path="/" element={<RootRedirect />} />
+
         <Route element={<ProtectedRoute />}>
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
-        <Route element={<RoleProtectedRoute allowedRoles={['adopter']} />}>
+        <Route element={<RoleProtectedRoute allowedRoles={['ADOPTER', 'SHELTER']} />}>
           <Route path="/home" element={<HomePage />} />
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/dashboard" element={<PetsListPage />} />
-          <Route path="/applications" element={<MyApplications />} />
           <Route path="/pets/:id" element={<PetDetailsPage />} />
+          <Route path="/dashboard" element={<PetsListPage />} />
         </Route>
 
-        <Route element={<RoleProtectedRoute allowedRoles={['shelter']} />}>
-          <Route path="/shelter" element={<ShelterDashboard />} />
+        <Route element={<RoleProtectedRoute allowedRoles={['ADOPTER']} />}>
+          <Route path="/applications" element={<MyApplications />} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route element={<RoleProtectedRoute allowedRoles={['SHELTER']} />}>
+          <Route path="/shelter" element={<Navigate to="/shelter/dashboard" replace />} />
+          <Route path="/shelter/dashboard" element={<ShelterDashboardPage />} />
+          <Route path="/shelter/create-pet" element={<CreatePetPage />} />
+          <Route path="/shelter/edit-pet/:id" element={<EditPetPage />} />
+          <Route path="/shelter/requests" element={<AdoptionRequestsPage />} />
+        </Route>
+
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Suspense>

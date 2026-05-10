@@ -101,7 +101,6 @@ const ProfilePage = () => {
       {/* MAIN CARD */}
       <div className="bg-white rounded-t-3xl -mt-5 relative z-10 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] px-5 pt-5 pb-8">
 
-        {/* SUCCESS TOAST */}
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-600 text-sm px-4 py-3 rounded-2xl mb-5 flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -141,19 +140,17 @@ const ProfilePage = () => {
             <h2 className="text-gray-800 text-lg font-black leading-tight">{user.full_name}</h2>
             <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
             <span className={`inline-block mt-1.5 text-xs font-bold px-3 py-0.5 rounded-full ${
-              user.role === 'shelter'
+              user.role === 'SHELTER'
                 ? 'bg-blue-100 text-blue-600'
                 : 'bg-pink-100 text-pink-600'
             }`}>
-              {user.role === 'shelter' ? '🏠 Shelter' : '🐾 Adopter'}
+              {user.role === 'SHELTER' ? '🏠 Shelter' : '🐾 Adopter'}
             </span>
           </div>
         </div>
 
-        {/* DIVIDER */}
         <div className="h-px bg-gray-100 mb-5" />
 
-        {/* VIEW MODE */}
         {!editing ? (
           <>
             <div className="space-y-4 mb-6">
@@ -181,7 +178,6 @@ const ProfilePage = () => {
             </button>
           </>
         ) : (
-          /* EDIT MODE */
           <div className="space-y-4">
             {[
               { key: 'full_name' as const, label: 'Full name', type: 'text', placeholder: 'Your name' },
@@ -269,4 +265,4 @@ const ProfilePage = () => {
   )
 }
 
-export default ProfilePage 
+export default ProfilePage
