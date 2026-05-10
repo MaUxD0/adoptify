@@ -23,7 +23,7 @@ const LoginPage = () => {
   const onSubmit = async (data: LoginForm) => {
     try {
       await login(data)
-      navigate('/home')
+      navigate('/')
     } catch { /* error en context */ }
   }
 

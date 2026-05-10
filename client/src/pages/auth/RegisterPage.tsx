@@ -10,7 +10,7 @@ const registerSchema = z.object({
   full_name: z.string().min(2, 'Name too short'),
   email: z.string().email('Invalid email'),
   password: z.string().min(6, 'At least 6 characters'),
-  role: z.enum(['adopter', 'shelter']),
+  role: z.enum(['ADOPTER', 'SHELTER']),
 })
 type RegisterForm = z.infer<typeof registerSchema>
 
@@ -20,7 +20,7 @@ const RegisterPage = () => {
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'adopter' },
+    defaultValues: { role: 'ADOPTER' },
   })
 
   const selectedRole = watch('role')
@@ -81,15 +81,15 @@ const RegisterPage = () => {
           </div>
         )}
 
-        {/* ROLE SELECTOR — cards visuales */}
+        {/* ROLE SELECTOR */}
         <div className="mb-5">
           <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">
             I am a...
           </label>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { value: 'adopter', emoji: '🐾', label: 'Adopter', sub: 'Looking for a pet' },
-              { value: 'shelter', emoji: '🏠', label: 'Shelter', sub: 'I have pets to adopt' },
+              { value: 'ADOPTER', emoji: '🐾', label: 'Adopter', sub: 'Looking for a pet' },
+              { value: 'SHELTER', emoji: '🏠', label: 'Shelter', sub: 'I have pets to adopt' },
             ].map(({ value, emoji, label, sub }) => (
               <label
                 key={value}

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePets } from "../../hooks/usePets";
 import { PetsService } from "../../services/pets.service";
 import Footer from "../../components/pet/Footer";
-import { adoptionService } from "../../services/adoption.service";
+import { useAdoptions } from "../../hooks/useAdoptions";
 import toast from "react-hot-toast";
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80";
@@ -15,6 +15,7 @@ const PetDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { pets } = usePets();
+  const { submit } = useAdoptions();
   const pet = pets.find((p) => p.id === id);
 
   const handleAdopt = async () => {
@@ -27,12 +28,10 @@ const PetDetailsPage = () => {
         return;
       }
 
-      const response = await adoptionService.createAdoption({
+      await submit({
         petId: pet.id,
         message: "Quiero adoptar esta mascota",
       });
-
-      console.log("ADOPTION RESPONSE:", response);
 
       toast.success("Solicitud enviada");
     } catch (error: any) {

@@ -38,11 +38,14 @@ export const authService = {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) return null
 
+    const role = (user.user_metadata?.role ?? 'ADOPTER').toUpperCase()
+
     return {
       id: user.id,
       email: user.email!,
       full_name: user.user_metadata?.full_name ?? '',
-      role: user.user_metadata?.role ?? 'adopter',
+      role: role as User['role'],
+      shelter_id: role === 'SHELTER' ? (user.user_metadata?.shelter_id ?? user.id) : undefined,
       avatar_url: user.user_metadata?.avatar_url,
       created_at: user.created_at,
     }

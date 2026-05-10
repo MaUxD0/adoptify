@@ -58,8 +58,8 @@ export const chatService = {
     return conversation;
   },
 
-  async findOrCreateConversation(adopterId: string, shelterId: string) {
-    return chatRepository.findOrCreateConversation(adopterId, shelterId);
+  async findOrCreateConversation(adopterId: string, shelterId: string, petId: string) {
+    return chatRepository.findOrCreateConversation(adopterId, shelterId, petId);
   },
-  
+
 };

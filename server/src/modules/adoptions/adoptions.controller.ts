@@ -51,7 +51,7 @@ export const adoptionsController = {
 
   async getShelterAdoptions(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const shelterId = req.user!.id;
+      const shelterId = req.user!.shelter_id || req.user!.id;
       const filters = req.query as unknown as AdoptionFiltersInput;
       const result = await adoptionsService.getShelterAdoptions(shelterId, filters);
       res.json({ success: true, ...result });
@@ -79,9 +79,10 @@ export const adoptionsController = {
   async approveAdoption(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const adoptionId = getParamId(req);
+      const shelterId = req.user!.shelter_id || req.user!.id;
       const adoption = await adoptionsService.approveAdoption(
         adoptionId,
-        req.user!.id,
+        shelterId,
         req.body.notes,
       );
       res.json({ success: true, data: adoption });
@@ -99,9 +100,10 @@ export const adoptionsController = {
   async rejectAdoption(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const adoptionId = getParamId(req);
+      const shelterId = req.user!.shelter_id || req.user!.id;
       const adoption = await adoptionsService.rejectAdoption(
         adoptionId,
-        req.user!.id,
+        shelterId,
         req.body.notes,
       );
       res.json({ success: true, data: adoption });

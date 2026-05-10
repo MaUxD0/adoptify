@@ -15,9 +15,9 @@ export const chatApi = {
     return api.get('/chat/conversations');
   },
 
-  findOrCreateConversation(adopterId: string, shelterId: string) {
-  return api.post('/chat/conversations', { adopterId, shelterId });
-},
+  findOrCreateConversation(adopterId: string, shelterId: string, petId: string) {
+    return api.post('/chat/conversations', { adopterId, shelterId, petId });
+  },
 
   getMessages(chatId: string, page = 1, limit = 30) {
     return api.get(`/chat/conversations/${chatId}/messages`, {

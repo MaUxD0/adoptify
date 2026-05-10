@@ -70,8 +70,12 @@ export const chatController = {
 
   async findOrCreateConversation(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { adopterId, shelterId } = req.body;
-      const conversation = await chatService.findOrCreateConversation(adopterId, shelterId);
+      const { adopterId, shelterId, petId } = req.body;
+      const conversation = await chatService.findOrCreateConversation(
+        adopterId,
+        shelterId,
+        petId,
+      );
       res.json({ success: true, data: conversation });
     } catch (error) {
       next(error);

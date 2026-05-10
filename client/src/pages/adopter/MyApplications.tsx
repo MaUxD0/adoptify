@@ -12,6 +12,7 @@ function MyApplications() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   const { user } = useAuth();
+
   const {
     messages,
     hasMore,
@@ -27,10 +28,22 @@ function MyApplications() {
     limit: 12,
   });
 
+  // ✅ FIX REAL: chat correcto con PET ID incluido
   const handleChat = async (adoption: any) => {
+    if (!user?.id) return;
+
     const shelterId = adoption.pets?.shelter_id;
-    if (!shelterId || !user?.id) return;
-    const conversationId = await openOrCreateConversation(user.id, shelterId);
+    const petId = adoption.pet_id || adoption.pets?.id;
+
+    if (!shelterId || !petId) return;
+
+    // 🔥 IMPORTANTE: 3 parámetros
+    const conversationId = await openOrCreateConversation(
+      user.id,
+      shelterId,
+      petId
+    );
+
     setActiveChatId(conversationId);
   };
 
@@ -41,8 +54,10 @@ function MyApplications() {
   const closeTracking = () => setTrackingAdoption(null);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-6">
-      <h1 className="text-2xl font-black text-gray-900 mb-6">My Applications</h1>
+    <main className="min-h-screen bg-white font-sans px-4 py-6">
+      <h1 className="text-2xl font-black text-gray-900 mb-6">
+        My Applications
+      </h1>
 
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
@@ -57,67 +72,43 @@ function MyApplications() {
             <AdoptionCard
               key={adoption.id}
               adoption={adoption}
-              onChat={handleChat}
+              onChat={() => handleChat(adoption)}
               onViewTracking={handleViewTracking}
             />
           ))}
         </div>
       )}
 
-      {/* Tracking Modal */}
+      {/* TRACKING */}
       {trackingAdoption && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
-                  Tracking details
-                </p>
-                <h2 className="text-xl font-bold text-gray-900 mt-2">
-                  Adoption status
-                </h2>
-              </div>
-              <button type="button" onClick={closeTracking} className="text-gray-400 hover:text-gray-700">
-                Close
-              </button>
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4">
+          <div className="w-full max-w-lg bg-white rounded-3xl p-6 shadow-xl">
+
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold">Tracking</h2>
+              <button onClick={closeTracking}>✕</button>
             </div>
 
-            <div className="mt-6 space-y-4 text-sm text-gray-700">
-              <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-4">
-                <span className="text-xs uppercase tracking-[0.2em] text-gray-500">Current status</span>
-                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                  trackingAdoption.status === 'PENDING'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : trackingAdoption.status === 'APPROVED'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {trackingAdoption.status}
-                </span>
+            <div className="mt-6 space-y-4">
+              <div className="flex justify-between items-center bg-gray-50 p-4 rounded-xl">
+                <span>Status</span>
+                <span className="font-bold">{trackingAdoption.status}</span>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Created at</p>
-                <p className="text-sm text-gray-900">
-                  {new Date(trackingAdoption.created_at).toLocaleString([], {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  })}
-                </p>
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <p className="text-sm text-gray-500">Message</p>
+                <p>{trackingAdoption.message || "No message"}</p>
               </div>
 
-              <div className="rounded-2xl border border-gray-200 p-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Message</p>
-                <p className="text-sm text-gray-900">
-                  {trackingAdoption.message || 'No message provided.'}
-                </p>
+              <div className="bg-gray-50 p-4 rounded-xl">
+                <p className="text-sm text-gray-500">Created</p>
+                <p>{new Date(trackingAdoption.created_at).toLocaleString()}</p>
               </div>
             </div>
 
             <button
-              type="button"
               onClick={closeTracking}
-              className="mt-6 w-full rounded-2xl bg-pink-500 px-4 py-3 text-sm font-semibold text-white hover:bg-pink-600 transition-colors"
+              className="w-full mt-6 bg-pink-500 text-white py-3 rounded-xl font-bold"
             >
               Close
             </button>
@@ -125,10 +116,11 @@ function MyApplications() {
         </div>
       )}
 
-      {/* Chat Overlay */}
+      {/* CHAT */}
       {activeChatId && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-end justify-center">
           <div className="w-full max-w-lg h-[70vh] bg-white rounded-t-3xl overflow-hidden">
+
             <ChatWindow
               messages={messages}
               hasMore={hasMore}
@@ -140,6 +132,7 @@ function MyApplications() {
               onLoadMore={loadMoreMessages}
               onClose={() => setActiveChatId(null)}
             />
+
           </div>
         </div>
       )}

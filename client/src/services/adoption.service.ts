@@ -1,64 +1,35 @@
-import api from '../api/axios';
-import type {
-  Adoption,
-  CreateAdoptionDto,
-  AdoptionFilters,
-  PaginatedAdoptions,
-} from '../types/adoption.types';
+import axios from "axios";
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-}
-
-interface PaginatedApiResponse extends PaginatedAdoptions {
-  success: boolean;
-}
+const API = "http://localhost:5000/api";
 
 export const adoptionService = {
-  async createAdoption(payload: CreateAdoptionDto): Promise<Adoption> {
-    const { data } = await api.post<ApiResponse<Adoption>>('/adoptions', payload);
-    return data.data;
+  async createAdoption(dto: any) {
+    const { data } = await axios.post(`${API}/adoptions`, dto);
+    return data;
   },
 
-  async getMyAdoptions(filters?: AdoptionFilters): Promise<PaginatedAdoptions> {
-    const { data } = await api.get<PaginatedApiResponse>('/adoptions/me', {
-      params: filters,
-    });
-    const { success: _success, ...paginated } = data;
-    return {
-      ...paginated,
-      data: paginated.data || [],
-    };
+  async getAdopterAdoptions(adopterId: string) {
+    const { data } = await axios.get(`${API}/adoptions/adopter/${adopterId}`);
+    return data;
   },
 
-  async getShelterAdoptions(filters?: AdoptionFilters): Promise<PaginatedAdoptions> {
-    const { data } = await api.get<PaginatedApiResponse>('/adoptions/shelter', {
-      params: filters,
-    });
-    const { success: _success, ...paginated } = data;
-    return {
-      ...paginated,
-      data: paginated.data || [],
-    };
+  async getShelterAdoptions(shelterId: string) {
+    const { data } = await axios.get(`${API}/adoptions/shelter/${shelterId}`);
+    return data;
   },
 
-  async getAdoptionById(id: string): Promise<Adoption> {
-    const { data } = await api.get<ApiResponse<Adoption>>(`/adoptions/${id}`);
-    return data.data;
+  async approveAdoption(id: string, notes?: string) {
+    const { data } = await axios.patch(`${API}/adoptions/${id}/approve`, { notes });
+    return data;
   },
 
-  async approveAdoption(id: string, notes?: string): Promise<Adoption> {
-    const { data } = await api.patch<ApiResponse<Adoption>>(`/adoptions/${id}/approve`, {
-      notes,
-    });
-    return data.data;
+  async rejectAdoption(id: string, notes?: string) {
+    const { data } = await axios.patch(`${API}/adoptions/${id}/reject`, { notes });
+    return data;
   },
 
-  async rejectAdoption(id: string, notes?: string): Promise<Adoption> {
-    const { data } = await api.patch<ApiResponse<Adoption>>(`/adoptions/${id}/reject`, {
-      notes,
-    });
-    return data.data;
+  async getAdoptionById(id: string) {
+    const { data } = await axios.get(`${API}/adoptions/${id}`);
+    return data;
   },
 };

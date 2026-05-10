@@ -7,11 +7,7 @@ import {
 } from "./adoptions.types";
 
 export const adoptionsRepository = {
-  async create(
-    data: CreateAdoptionDto & {
-      adopterId: string;
-    }
-  ) {
+  async create(data: CreateAdoptionDto & { adopterId: string }) {
     const { data: adoption, error } = await supabase
       .from("adoption_requests")
       .insert([
@@ -22,11 +18,20 @@ export const adoptionsRepository = {
           status: AdoptionStatuses.PENDING,
         },
       ])
-      .select()
+      .select(
+        `
+        *,
+        pets (
+          id,
+          name,
+          shelter_id,
+          image_url
+        )
+      `
+      )
       .single();
 
     if (error) throw error;
-
     return adoption;
   },
 
@@ -36,102 +41,94 @@ export const adoptionsRepository = {
       .select(`
         *,
         pets (
-          shelter_id
+          id,
+          name,
+          shelter_id,
+          image_url
         )
       `)
       .eq("id", id)
       .single();
 
     if (error) throw error;
-
     return data;
   },
 
-  async findByAdopter(
-    adopterId: string,
-    filters: AdoptionFilters
-  ) {
+  async findByAdopter(adopterId: string, filters: AdoptionFilters) {
     let query = supabase
-  .from("adoption_requests")
-  .select(`
-    *,
-    pets (
-      shelter_id
-    )
-  `)
-  .eq("adopter_id", adopterId);
+      .from("adoption_requests")
+      .select(`
+        *,
+        pets (
+          id,
+          name,
+          shelter_id,
+          image_url
+        )
+      `)
+      .eq("adopter_id", adopterId)
+      .order("created_at", { ascending: false });
 
     if (filters.status) {
       query = query.eq("status", filters.status);
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
 
     return {
-      data,
-      total: data.length,
+      data: data ?? [],
+      total: data?.length ?? 0,
       page: filters.page || 1,
       limit: filters.limit || 10,
       totalPages: 1,
     };
   },
 
-  async findByShelter(
-    shelterId: string,
-    filters: AdoptionFilters
-  ) {
+  async findByShelter(shelterId: string, filters: AdoptionFilters) {
     let query = supabase
       .from("adoption_requests")
       .select(`
         *,
         pets!inner (
-          shelter_id
+          id,
+          name,
+          shelter_id,
+          image_url
         )
       `)
-      .eq("pets.shelter_id", shelterId);
+      .eq("pets.shelter_id", shelterId)
+      .order("created_at", { ascending: false });
 
     if (filters.status) {
       query = query.eq("status", filters.status);
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
 
     return {
-      data,
-      total: data.length,
+      data: data ?? [],
+      total: data?.length ?? 0,
       page: filters.page || 1,
       limit: filters.limit || 10,
       totalPages: 1,
     };
   },
 
-  async updateStatus(
-  id: string,
-  status: string,
-  notes?: string
-) {
+  async updateStatus(id: string, status: string, notes?: string) {
     const { data, error } = await supabase
       .from("adoption_requests")
-      .update({
-        status,
-      })
+      .update({ status })
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw error;
-
     return data;
   },
 
-  async existsByPetAndAdopter(
-    petId: string,
-    adopterId: string
-  ) {
+  async existsByPetAndAdopter(petId: string, adopterId: string) {
     const { data, error } = await supabase
       .from("adoption_requests")
       .select("id")
@@ -139,7 +136,6 @@ export const adoptionsRepository = {
       .eq("adopter_id", adopterId);
 
     if (error) throw error;
-
-    return data.length > 0;
+    return (data?.length ?? 0) > 0;
   },
 };

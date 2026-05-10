@@ -18,9 +18,9 @@ interface AdoptionContextValue {
   isLoading: boolean;
   error: string | null;
 
-  // Actions
-  fetchMyAdoptions: (filters?: AdoptionFilters) => Promise<void>;
-  fetchShelterAdoptions: (filters?: AdoptionFilters) => Promise<void>;
+  // Actions — userId se pasa como parámetro hasta que auth esté integrado
+  fetchMyAdoptions: (adopterId: string, filters?: AdoptionFilters) => Promise<void>;
+  fetchShelterAdoptions: (shelterId: string, filters?: AdoptionFilters) => Promise<void>;
   submitAdoption: (payload: CreateAdoptionDto) => Promise<Adoption | null>;
   approveAdoption: (id: string, notes?: string) => Promise<void>;
   rejectAdoption: (id: string, notes?: string) => Promise<void>;
@@ -44,11 +44,11 @@ export function AdoptionProvider({ children }: { children: ReactNode }) {
     toast.error(message);
   };
 
-  const fetchMyAdoptions = useCallback(async (filters?: AdoptionFilters) => {
+  const fetchMyAdoptions = useCallback(async (adopterId: string, _filters?: AdoptionFilters) => {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, ...meta } = await adoptionService.getMyAdoptions(filters);
+      const { data, ...meta } = await adoptionService.getAdopterAdoptions(adopterId);
       setAdoptions(data || []);
       setPagination(meta);
     } catch (err) {
@@ -58,11 +58,11 @@ export function AdoptionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const fetchShelterAdoptions = useCallback(async (filters?: AdoptionFilters) => {
+  const fetchShelterAdoptions = useCallback(async (shelterId: string, _filters?: AdoptionFilters) => {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, ...meta } = await adoptionService.getShelterAdoptions(filters);
+      const { data, ...meta } = await adoptionService.getShelterAdoptions(shelterId);
       setAdoptions(data || []);
       setPagination(meta);
     } catch (err) {
