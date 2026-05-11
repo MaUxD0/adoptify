@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { AuthRequest } from '../../middlewares/auth.middleware';
+import type { AuthRequest } from '../../middlewares/auth.middleware';
 import { chatService, ConversationNotFoundError, ConversationForbiddenError } from './chat.service';
 
 export const chatController = {
@@ -7,6 +7,20 @@ export const chatController = {
     try {
       const conversations = await chatService.getUserConversations(req.user!.id);
       res.json({ success: true, data: conversations });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async findOrCreateConversation(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { adopterId, shelterId, petId } = req.body as {
+        adopterId: string;
+        shelterId: string;
+        petId: string;
+      };
+      const conversation = await chatService.findOrCreateConversation(adopterId, shelterId, petId);
+      res.status(200).json({ success: true, data: conversation });
     } catch (error) {
       next(error);
     }
@@ -54,30 +68,17 @@ export const chatController = {
   async sendMessage(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const conversationId = req.params.conversationId as string;
+      const { content } = req.body as { content: string };
       const message = await chatService.sendMessage(
         conversationId,
         req.user!.id,
-        req.body.content,
+        content,
       );
       res.status(201).json({ success: true, data: message });
     } catch (error) {
       if (error instanceof ConversationForbiddenError) {
         return res.status(403).json({ success: false, message: error.message });
       }
-      next(error);
-    }
-  },
-
-  async findOrCreateConversation(req: AuthRequest, res: Response, next: NextFunction) {
-    try {
-      const { adopterId, shelterId, petId } = req.body;
-      const conversation = await chatService.findOrCreateConversation(
-        adopterId,
-        shelterId,
-        petId,
-      );
-      res.json({ success: true, data: conversation });
-    } catch (error) {
       next(error);
     }
   },

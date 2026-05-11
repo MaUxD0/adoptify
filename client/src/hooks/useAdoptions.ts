@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import { useAdoptionContext } from '../providers/AdoptionProvider';
+import { useAuth } from './useAuth';
 import type { AdoptionFilters } from '../types/adoption.types';
-
-// TODO: Replace with real auth context value once auth module is integrated
-const CURRENT_USER_ID = 'REPLACE_WITH_AUTH_CONTEXT';
 
 /**
  * Hook for adopter-facing adoption list.
@@ -11,11 +9,14 @@ const CURRENT_USER_ID = 'REPLACE_WITH_AUTH_CONTEXT';
  */
 export function useAdoptions(filters?: AdoptionFilters) {
   const ctx = useAdoptionContext();
+  const { user } = useAuth();
 
   useEffect(() => {
-    ctx.fetchMyAdoptions(CURRENT_USER_ID, filters);
+    if (user?.id) {
+      ctx.fetchMyAdoptions(user.id, filters);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters?.status, filters?.page, filters?.limit]);
+  }, [user?.id, filters?.status, filters?.page, filters?.limit]);
 
   return {
     adoptions: ctx.adoptions,
@@ -23,7 +24,8 @@ export function useAdoptions(filters?: AdoptionFilters) {
     isLoading: ctx.isLoading,
     error: ctx.error,
     submit: ctx.submitAdoption,
-    refetch: (filters?: AdoptionFilters) => ctx.fetchMyAdoptions(CURRENT_USER_ID, filters),
+    refetch: (filters?: AdoptionFilters) =>
+      user?.id ? ctx.fetchMyAdoptions(user.id, filters) : Promise.resolve(),
   };
 }
 
@@ -32,11 +34,14 @@ export function useAdoptions(filters?: AdoptionFilters) {
  */
 export function useShelterAdoptions(filters?: AdoptionFilters) {
   const ctx = useAdoptionContext();
+  const { user } = useAuth();
 
   useEffect(() => {
-    ctx.fetchShelterAdoptions(CURRENT_USER_ID, filters);
+    if (user?.id) {
+      ctx.fetchShelterAdoptions(user.id, filters);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters?.status, filters?.page, filters?.limit]);
+  }, [user?.id, filters?.status, filters?.page, filters?.limit]);
 
   return {
     adoptions: ctx.adoptions,
@@ -45,6 +50,7 @@ export function useShelterAdoptions(filters?: AdoptionFilters) {
     error: ctx.error,
     approve: ctx.approveAdoption,
     reject: ctx.rejectAdoption,
-    refetch: (filters?: AdoptionFilters) => ctx.fetchShelterAdoptions(CURRENT_USER_ID, filters),
+    refetch: (filters?: AdoptionFilters) =>
+      user?.id ? ctx.fetchShelterAdoptions(user.id, filters) : Promise.resolve(),
   };
 }
