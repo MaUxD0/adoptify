@@ -98,24 +98,28 @@ export const chatRepository = {
     if (error) throw error;
   },
   
-  async findOrCreateConversation(adopterId: string, shelterId: string) {
-    const { data: existing } = await supabase
-      .from('chats')
-      .select('*')
-      .eq('adopter_id', adopterId)
-      .eq('shelter_id', shelterId)
-      .maybeSingle();
+  async findOrCreateConversation(adopterId: string, shelterId: string, petId?: string) {
+  const { data: existing } = await supabase
+    .from('chats')
+    .select('*')
+    .eq('adopter_id', adopterId)
+    .eq('shelter_id', shelterId)
+    .maybeSingle();
 
-    if (existing) return existing;
+  if (existing) return existing;
 
-    const { data, error } = await supabase
-      .from('chats')
-      .insert({ adopter_id: adopterId, shelter_id: shelterId })
-      .select()
-      .single();
+  const { data, error } = await supabase
+    .from('chats')
+    .insert({ 
+      adopter_id: adopterId, 
+      shelter_id: shelterId,
+      pet_id: petId ?? null,
+    })
+    .select()
+    .single();
 
-    if (error) throw error;
-    return data;
-  },
+  if (error) throw error;
+  return data;
+},
 
 };
