@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PetsService } from "../../services/pets.service";
-import { useAuth } from "../../hooks/useAuth";
 
 const SPECIES_OPTIONS = [
   { label: "Perro", value: "dog" },
@@ -14,7 +13,6 @@ const SIZE_OPTIONS = ["Pequeño", "Mediano", "Grande"];
 
 const CreatePetPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
@@ -34,7 +32,6 @@ const CreatePetPage = () => {
     setLoading(true);
     try {
       await PetsService.createPet({
-        shelter_id: user?.shelter_id ?? "29f6c1a2-0b4f-4561-ae65-8c3664096385",
         name,
         species: species,
         breed,

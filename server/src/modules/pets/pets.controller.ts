@@ -6,6 +6,8 @@ import type {
 import { PetsService } from "./pets.service";
 
 import { createPetSchema } from "./pets.schemas";
+import type { CreatePetDTO } from "./pets.types";
+import type { AuthRequest } from "../../middlewares/auth.middleware";
 
 export class PetsController {
   static async getAllPets(
@@ -69,55 +71,40 @@ export class PetsController {
     }
   }
 
-  static async createPet(
-    req: Request,
-    res: Response
-  ) {
-    try {
-      console.log(req.body);
 
-      const validation =
-        createPetSchema.safeParse(
-          req.body
-        );
+static async createPet(req: AuthRequest, res: Response) {
+  try {
+    console.log(req.body);
 
-      if (!validation.success) {
-        console.log(
-          validation.error.flatten()
-        );
+    const validation = createPetSchema.safeParse(req.body);
 
-        return res.status(400).json({
-          success: false,
-          errors:
-            validation.error.flatten(),
-        });
-      }
-
-      const shelterId =
-        req.body.shelter_id as string;
-
-      const pet =
-        await PetsService.createPet(
-          shelterId,
-          validation.data as any
-        );
-
-      res.status(201).json({
-        success: true,
-        data: pet,
-      });
-    } catch (error) {
-      console.error(error);
-
-      res.status(500).json({
+    if (!validation.success) {
+      return res.status(400).json({
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Server error",
+        errors: validation.error.flatten(),
       });
     }
+
+    const shelterId = req.user?.id; // ✅ del token, no del body
+
+    if (!shelterId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    
+const pet = await PetsService.createPet(shelterId, validation.data as CreatePetDTO);
+    res.status(201).json({ success: true, data: pet });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Server error",
+    });
   }
+}
 
   static async updatePet(
   req: Request,

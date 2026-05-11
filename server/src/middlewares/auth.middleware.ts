@@ -37,7 +37,6 @@ export const authMiddleware = async (
 
     const role = user.user_metadata?.role?.toUpperCase() ?? 'ADOPTER'
 
-    // ✅ CREAR USER EN TABLA users SI NO EXISTE
     const { data: existingUser } = await supabaseAdmin
       .from('users')
       .select('id')
@@ -47,15 +46,12 @@ export const authMiddleware = async (
     if (!existingUser) {
       const { error: insertError } = await supabaseAdmin
         .from('users')
-        .insert([
-          {
-            id: user.id,
-            name: user.user_metadata?.full_name ?? 'Usuario',
-            email: user.email,
-            password: 'supabase-auth-user',
-            role,
-          },
-        ])
+        .insert([{
+          id: user.id,
+          name: user.user_metadata?.full_name ?? 'Usuario',
+          email: user.email,
+          role,
+        }])
 
       if (insertError) {
         console.error('ERROR INSERT USER:', insertError)
@@ -76,4 +72,4 @@ export const authMiddleware = async (
     console.error(err)
     res.status(401).json({ error: 'Error al verificar token' })
   }
-}
+} 

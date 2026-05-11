@@ -34,11 +34,12 @@ const PetDetailsPage = () => {
       });
 
       toast.success("Solicitud enviada");
-    } catch (error: any) {
-      console.error(
-        "ERROR BACKEND:",
-        error?.response?.data || error
-      );
+    } catch (error) {
+  const err = error as { response?: { data?: unknown } };
+  console.error(
+    "ERROR BACKEND:",
+    err?.response?.data || error
+  );
       toast.error("Error al enviar la solicitud");
     }
   };

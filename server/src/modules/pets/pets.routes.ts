@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { PetsController } from "./pets.controller";
+import { authMiddleware } from "../../middlewares/auth.middleware";
 
 const router = Router();
 
@@ -14,10 +15,10 @@ router.get(
   PetsController.getPetById
 );
 
+
 router.post(
-  "/",
-  PetsController.createPet
-);
+    "/", 
+    authMiddleware, PetsController.createPet);
 
 router.patch(
   "/:id",

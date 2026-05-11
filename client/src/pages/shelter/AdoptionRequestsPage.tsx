@@ -4,6 +4,7 @@ import { useShelterAdoptions } from "../../hooks/useAdoptions";
 import { useChatContext } from "../../providers/ChatProvider";
 import { useAuth } from "../../hooks/useAuth";
 import { ChatWindow } from "../../components/chat/ChatWindow";
+import type { Adoption } from "../../types/adoption.types";
 
 type FilterStatus = "all" | "PENDING" | "APPROVED" | "REJECTED";
 
@@ -31,7 +32,7 @@ const AdoptionRequestsPage = () => {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   const { adoptions, isLoading, approve, reject } = useShelterAdoptions(
-    filter !== "all" ? { status: filter as any } : undefined
+   filter !== "all" ? { status: filter } : undefined
   );
 
   const {
@@ -158,7 +159,7 @@ const RequestCard = ({
   onReject,
   onChat,
 }: {
-  req: any;
+    req: Adoption;
   onApprove: () => void;
   onReject: () => void;
   onChat: () => void;
