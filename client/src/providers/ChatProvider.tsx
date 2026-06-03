@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { chatService } from '../services/chat.service';
 import { supabase } from '../api/supabase';
+import { useAuth } from '../hooks/useAuth';
 
 const CHAT_CHANNEL = 'chat_messages_realtime';
 
@@ -85,9 +86,13 @@ function reducer(state: ChatState, action: ChatAction): ChatState {
     case 'SEND_START':
       return { ...state, isSending: true };
     case 'SEND_SUCCESS':
+      // Avoid duplicate: check if already exists
+      if (state.messages.find(m => m.id === action.payload.id)) return state;
       return { ...state, isSending: false, messages: [...state.messages, action.payload] };
     case 'MESSAGE_RECEIVED':
       if (state.activeConversationId !== action.payload.chat_id) return state;
+      // Avoid duplicate: check if already exists
+      if (state.messages.find(m => m.id === action.payload.id)) return state;
       return { ...state, messages: [...state.messages, action.payload] };
     case 'SET_ACTIVE':
       return { ...state, activeConversationId: action.payload, messages: [], messagesPage: 1, messagesTotal: 0 };
@@ -113,14 +118,20 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { user } = useAuth();
 
   // Realtime
   useEffect(() => {
+    if (!user?.id) return;
     const channel = supabase.channel(CHAT_CHANNEL);
     channel
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
         if (payload?.message) {
-          dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
+          // If the message is not from me, add it.
+          // The sender handles the optimistic update via SEND_SUCCESS.
+          if (payload.message.sender_id !== user.id) {
+            dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
+          }
         }
       })
       .subscribe();
@@ -128,7 +139,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user?.id]);
 
   const loadConversations = useCallback(async () => {
     dispatch({ type: 'CONVERSATIONS_LOADING' });
