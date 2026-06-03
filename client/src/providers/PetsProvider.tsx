@@ -1,76 +1,105 @@
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import toast from 'react-hot-toast'
+import { supabase } from '../api/supabase'
+import { PetsContext } from '../context/pets/PetsContext'
 import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
-import type { ReactNode } from "react";
-
-import { PetsService } from "../services/pets.service";
-
-import { PetsContext } from "../context/PetsContext";
-
-import type { Pet } from "../types/pet.types";
+  PETS_REALTIME_CHANNEL,
+  type PetRealtimeEvent,
+} from '../shared/constants/realtime'
+import type { Pet } from '../shared/types/pet.types'
+import { PetsService } from '../services/pets.service'
 
 interface Props {
-  children: ReactNode;
+  children: ReactNode
 }
 
-export const PetsProvider = ({
-  children,
-}: Props) => {
-  const [pets, setPets] = useState<Pet[]>([]);
+interface RealtimePayload {
+  pet?: Pet
+  petId?: string
+}
 
-  const [loading, setLoading] =
-    useState(true);
+export const PetsProvider = ({ children }: Props) => {
+  const [pets, setPets] = useState<Pet[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [speciesFilter, setSpeciesFilter] = useState('')
 
-  const [
-    speciesFilter,
-    setSpeciesFilter,
-  ] = useState("");
+  const refreshPets = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const data = await PetsService.getAll()
+      setPets(data)
+    } catch {
+      const message = 'No se pudieron cargar las mascotas'
+      setError(message)
+      toast.error(message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    const fetchPets = async () => {
-      try {
-        const response =
-          await PetsService.getAllPets();
+    void refreshPets()
+  }, [refreshPets])
 
-        setPets(response || []);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
+  useEffect(() => {
+    const channel = supabase.channel(PETS_REALTIME_CHANNEL)
+
+    const handleEvent = (event: PetRealtimeEvent) => (message: { payload: RealtimePayload }) => {
+      const { pet, petId } = message.payload ?? {}
+
+      if (event === 'pet:created' && pet) {
+        setPets((current) => [pet, ...current.filter((p) => p.id !== pet.id)])
+        toast.success(`Nueva mascota: ${pet.name}`)
+        return
       }
-    };
 
-    fetchPets();
-  }, []);
+      if (event === 'pet:updated' && pet) {
+        setPets((current) => current.map((p) => (p.id === pet.id ? pet : p)))
+        return
+      }
 
- const filteredPets = useMemo(() => {
-  return (pets || []).filter((pet) => {
-    if (speciesFilter && 
-        pet.species.toLowerCase() !== speciesFilter.toLowerCase()) {
-      return false;
+      if (event === 'pet:deleted' && petId) {
+        setPets((current) => current.filter((p) => p.id !== petId))
+        toast('Mascota eliminada del catálogo')
+      }
     }
-    return true;
-  });
-}, [pets, speciesFilter]);
+
+    channel
+      .on('broadcast', { event: 'pet:created' }, handleEvent('pet:created'))
+      .on('broadcast', { event: 'pet:updated' }, handleEvent('pet:updated'))
+      .on('broadcast', { event: 'pet:deleted' }, handleEvent('pet:deleted'))
+      .subscribe()
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [])
+
+  const filteredPets = useMemo(() => {
+    if (!speciesFilter) return pets
+
+    return pets.filter(
+      (pet) => pet.species.toLowerCase() === speciesFilter.toLowerCase(),
+    )
+  }, [pets, speciesFilter])
 
   return (
     <PetsContext.Provider
       value={{
         pets,
-
         filteredPets,
-
         loading,
-
+        error,
         speciesFilter,
-
         setSpeciesFilter,
+        refreshPets,
       }}
     >
       {children}
     </PetsContext.Provider>
-  );
-};
+  )
+}
+

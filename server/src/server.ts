@@ -1,11 +1,18 @@
-import dotenv from "dotenv";
+import { env } from './config/env'
+import app from './app'
+import { realtimeService } from './modules/pets/pets.routes'
 
-dotenv.config();
+const start = async () => {
+  try {
+    await realtimeService.initialize()
+    console.log('[Realtime] Canal pets-updates listo')
+  } catch (error) {
+    console.warn('[Realtime] No se pudo inicializar:', error)
+  }
 
-import app from "./app";
+  app.listen(Number(env.PORT), () => {
+    console.log(`Server running on port ${env.PORT}`)
+  })
+}
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+start()
