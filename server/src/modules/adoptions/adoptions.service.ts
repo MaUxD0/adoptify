@@ -1,6 +1,10 @@
 import { adoptionsRepository } from "./adoptions.repository";
 import { chatRepository } from "../chat/chat.repository";
 import { AdoptionStatuses } from "./adoptions.types";
+import { RealtimeService } from "../../shared/realtime/realtime.service";
+
+const realtime = new RealtimeService();
+const ADOPTIONS_CHANNEL = 'adoption_requests_realtime';
 
 // ─────────────────────────────
 // ERRORS
@@ -53,6 +57,9 @@ export const adoptionsService = {
       ...dto,
       adopterId,
     });
+
+    // Broadcast creation
+    await realtime.emit('adoption:created', { adoption }, ADOPTIONS_CHANNEL);
 
     // 3. crear chat automático (SAFE)
     try {
@@ -108,11 +115,16 @@ export const adoptionsService = {
       );
     }
 
-    return adoptionsRepository.updateStatus(
+    const updated = await adoptionsRepository.updateStatus(
       adoptionId,
       AdoptionStatuses.APPROVED,
       notes
     );
+
+    // Broadcast update
+    await realtime.emit('adoption:updated', { adoption: updated }, ADOPTIONS_CHANNEL);
+
+    return updated;
   },
 
   // ─────────────────────────────
@@ -131,11 +143,16 @@ export const adoptionsService = {
       );
     }
 
-    return adoptionsRepository.updateStatus(
+    const updated = await adoptionsRepository.updateStatus(
       adoptionId,
       AdoptionStatuses.REJECTED,
       notes
     );
+
+    // Broadcast update
+    await realtime.emit('adoption:updated', { adoption: updated }, ADOPTIONS_CHANNEL);
+
+    return updated;
   },
 
   // ─────────────────────────────

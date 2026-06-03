@@ -47,7 +47,7 @@ router.patch(
 router.patch(
   '/:id/reject',
   requireRole('SHELTER'),
-  validate({ params: adoptionIdParamSchema, body: updateAdoptionStatusSchema }),
+  validate({ params: adoptionIdParamSchema }),
   adoptionsController.rejectAdoption,
 );
 
