@@ -13,12 +13,12 @@ export interface AuthRequest extends Request {
 export const authMiddleware = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const authHeader = req.headers.authorization
 
   if (!authHeader?.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Token no proporcionado' })
+    res.status(401).json({ success: false, error: 'Token no proporcionado' })
     return
   }
 
@@ -31,11 +31,11 @@ export const authMiddleware = async (
     } = await supabaseAdmin.auth.getUser(token)
 
     if (error || !user) {
-      res.status(401).json({ error: 'Token inválido o expirado' })
+      res.status(401).json({ success: false, error: 'Token inválido o expirado' })
       return
     }
 
-    const role = user.user_metadata?.role?.toUpperCase() ?? 'ADOPTER'
+    const role = (user.user_metadata?.role as string | undefined)?.toUpperCase() ?? 'ADOPTER'
 
     const { data: existingUser } = await supabaseAdmin
       .from('users')
@@ -44,32 +44,27 @@ export const authMiddleware = async (
       .maybeSingle()
 
     if (!existingUser) {
-      const { error: insertError } = await supabaseAdmin
-        .from('users')
-        .insert([{
-          id: user.id,
-          name: user.user_metadata?.full_name ?? 'Usuario',
-          email: user.email,
-          role,
-        }])
+      const { error: insertError } = await supabaseAdmin.from('users').insert({
+        id: user.id,
+        name: (user.user_metadata?.full_name as string | undefined) ?? 'Usuario',
+        email: user.email,
+        role,
+      })
 
       if (insertError) {
-        console.error('ERROR INSERT USER:', insertError)
-      } else {
-        console.log('USER CREATED IN users TABLE')
+        console.error('[auth] No se pudo crear fila en users:', insertError.message)
       }
     }
 
     req.user = {
       id: user.id,
-      email: user.email!,
+      email: user.email ?? '',
       role,
-      full_name: user.user_metadata?.full_name ?? '',
+      full_name: (user.user_metadata?.full_name as string | undefined) ?? '',
     }
 
     next()
-  } catch (err) {
-    console.error(err)
-    res.status(401).json({ error: 'Error al verificar token' })
+  } catch {
+    res.status(401).json({ success: false, error: 'Error al verificar token' })
   }
-} 
+}
