@@ -12,20 +12,25 @@ export class RealtimeService {
   async emit(event: string, payload: any, channelName: string = DEFAULT_REALTIME_CHANNEL): Promise<void> {
     const channel = supabaseAdmin.channel(channelName)
     
-    // Nos suscribimos temporalmente para enviar el mensaje
-    // En broadcast de Supabase, el emisor no necesita estar suscrito permanentemente
-    // pero el canal debe estar inicializado.
-    
-    await channel.subscribe(async (status) => {
-      if (status === 'SUBSCRIBED') {
-        await channel.send({
-          type: 'broadcast',
-          event,
-          payload,
-        })
-        // Opcional: limpiar el canal después de enviar
-        void supabaseAdmin.removeChannel(channel)
-      }
+    return new Promise((resolve, reject) => {
+      channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          try {
+            await channel.send({
+              type: 'broadcast',
+              event,
+              payload,
+            })
+            void supabaseAdmin.removeChannel(channel)
+            resolve()
+          } catch (err) {
+            reject(err)
+          }
+        }
+        if (status === 'CHANNEL_ERROR') {
+          reject(new Error(`Error subscribing to channel ${channelName}`))
+        }
+      })
     })
   }
 }
