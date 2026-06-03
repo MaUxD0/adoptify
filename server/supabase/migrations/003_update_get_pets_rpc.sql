@@ -17,6 +17,8 @@ AS $$
       'gender', p.gender,
       'description', p.description,
       'image_url', p.image_url,
+      'latitude', p.latitude,
+      'longitude', p.longitude,
       'status', p.status,
       'created_at', p.created_at,
       'shelter', json_build_object(
