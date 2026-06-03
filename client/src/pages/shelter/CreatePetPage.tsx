@@ -11,6 +11,10 @@ const SPECIES_OPTIONS = [
   { label: "Otro", value: "other" },
 ];  
 const SIZE_OPTIONS = ["Pequeño", "Mediano", "Grande"];
+const GENDER_OPTIONS = [
+  { label: "Macho", value: "male" },
+  { label: "Hembra", value: "female" },
+];
 
 const CreatePetPage = () => {
   const navigate = useNavigate();
@@ -20,6 +24,7 @@ const CreatePetPage = () => {
   const [breed, setBreed] = useState("");
   const [age, setAge] = useState("");
   const [size, setSize] = useState("");
+  const [gender, setGender] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [location, setLocation] = useState<[number, number] | null>(null);
@@ -27,7 +32,7 @@ const CreatePetPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !species || !age || !description) {
+    if (!name || !species || !age || !description || !gender) {
       alert("Por favor completa los campos obligatorios.");
       return;
     }
@@ -39,6 +44,7 @@ const CreatePetPage = () => {
         breed,
         age: Number(age),
         size: size.toLowerCase(),
+        gender,
         description,
         image_url: imageUrl,
         latitude: location?.[0],
@@ -153,6 +159,26 @@ const CreatePetPage = () => {
                   }`}
                 >
                   {s}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          {/* Género */}
+          <Field label="Género *">
+            <div className="flex gap-2">
+              {GENDER_OPTIONS.map((g) => (
+                <button
+                  key={g.value}
+                  type="button"
+                  onClick={() => setGender(g.value)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
+                    gender === g.value
+                      ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
+                      : "border-gray-200 text-gray-400 hover:border-pink-300 hover:text-pink-500"
+                  }`}
+                >
+                  {g.label}
                 </button>
               ))}
             </div>
