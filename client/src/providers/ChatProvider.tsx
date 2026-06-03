@@ -2,10 +2,14 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useReducer,
   type ReactNode,
 } from 'react';
 import { chatService } from '../services/chat.service';
+import { supabase } from '../api/supabase';
+
+const CHAT_CHANNEL = 'chat_messages_realtime';
 
 interface Conversation {
   id: string;
@@ -43,6 +47,7 @@ type ChatAction =
   | { type: 'CONVERSATIONS_LOADING' }
   | { type: 'MESSAGES_LOADING' }
   | { type: 'MESSAGES_SUCCESS'; payload: { messages: Message[]; total: number; page: number; prepend: boolean } }
+  | { type: 'MESSAGE_RECEIVED'; payload: Message }
   | { type: 'SEND_START' }
   | { type: 'SEND_SUCCESS'; payload: Message }
   | { type: 'SET_ACTIVE'; payload: string }
@@ -81,6 +86,9 @@ function reducer(state: ChatState, action: ChatAction): ChatState {
       return { ...state, isSending: true };
     case 'SEND_SUCCESS':
       return { ...state, isSending: false, messages: [...state.messages, action.payload] };
+    case 'MESSAGE_RECEIVED':
+      if (state.activeConversationId !== action.payload.chat_id) return state;
+      return { ...state, messages: [...state.messages, action.payload] };
     case 'SET_ACTIVE':
       return { ...state, activeConversationId: action.payload, messages: [], messagesPage: 1, messagesTotal: 0 };
     case 'CLOSE':
@@ -105,6 +113,22 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  // Realtime
+  useEffect(() => {
+    const channel = supabase.channel(CHAT_CHANNEL);
+    channel
+      .on('broadcast', { event: 'message:created' }, ({ payload }) => {
+        if (payload?.message) {
+          dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
+        }
+      })
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, []);
 
   const loadConversations = useCallback(async () => {
     dispatch({ type: 'CONVERSATIONS_LOADING' });

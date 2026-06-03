@@ -1,4 +1,8 @@
 import { chatRepository } from './chat.repository';
+import { RealtimeService } from '../../shared/realtime/realtime.service';
+
+const realtime = new RealtimeService();
+const CHAT_CHANNEL = 'chat_messages_realtime';
 
 export class ConversationNotFoundError extends Error {
   constructor(id: string) {
@@ -45,7 +49,9 @@ export const chatService = {
     const isParticipant = await chatRepository.isParticipant(conversationId, senderId);
     if (!isParticipant) throw new ConversationForbiddenError();
 
-    return chatRepository.sendMessage(conversationId, senderId, content);
+    const message = await chatRepository.sendMessage(conversationId, senderId, content);
+    await realtime.emit('message:created', { message }, CHAT_CHANNEL);
+    return message;
   },
 
   async getConversationById(conversationId: string, userId: string) {
