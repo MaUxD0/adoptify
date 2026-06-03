@@ -38,22 +38,30 @@ const CreatePetPage = () => {
     }
     setLoading(true);
     try {
-      await PetsService.createPet({
+      const payload: any = {
         name,
-        species: species,
-        breed,
+        species: species.toLowerCase(),
         age: Number(age),
-        size: size.toLowerCase(),
         gender,
         description,
-        image_url: imageUrl,
-        latitude: location?.[0],
-        longitude: location?.[1],
-      });
+      };
+
+      if (breed) payload.breed = breed;
+      if (size) payload.size = size.toLowerCase();
+      if (imageUrl) payload.image_url = imageUrl;
+      if (location) {
+        payload.latitude = location[0];
+        payload.longitude = location[1];
+      }
+
+      await PetsService.createPet(payload);
       navigate("/shelter/dashboard");
-    } catch (error) {
-      console.error(error);
-      alert("Error al crear la mascota. Inténtalo de nuevo.");
+    } catch (error: any) {
+      console.error("DETAILED ERROR:", error.response?.data || error);
+      const serverMessage = error.response?.data?.errors?.[0]?.message || 
+                           error.response?.data?.message || 
+                           "Error al crear la mascota";
+      alert(`Error: ${serverMessage}`);
     } finally {
       setLoading(false);
     }

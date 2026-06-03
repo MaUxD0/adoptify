@@ -6,6 +6,10 @@ import { Map } from "../../components/ui/Map/Map";
 
 const SPECIES_OPTIONS = ["Perro", "Gato", "Conejo", "Ave", "Otro"];
 const SIZE_OPTIONS = ["Pequeño", "Mediano", "Grande"];
+const GENDER_OPTIONS = [
+  { label: "Macho", value: "male" },
+  { label: "Hembra", value: "female" },
+];
 
 const EditPetPage = () => {
   const { id } = useParams();
@@ -22,6 +26,7 @@ const EditPetPage = () => {
   const [size, setSize] = useState(
     pet?.size ? pet.size.charAt(0).toUpperCase() + pet.size.slice(1) : ""
   );
+  const [gender, setGender] = useState(pet?.gender ?? "");
   const [description, setDescription] = useState(pet?.description ?? "");
   const [imageUrl, setImageUrl] = useState(pet?.image_url ?? "");
   const [location, setLocation] = useState<[number, number] | null>(
@@ -48,21 +53,30 @@ const EditPetPage = () => {
     if (!id) return;
     setLoading(true);
     try {
-      await PetsService.updatePet(id, {
+      const payload: any = {
         name,
         species: species.toLowerCase(),
-        breed,
         age: Number(age),
-        size: size.toLowerCase(),
+        gender,
         description,
-        image_url: imageUrl,
-        latitude: location?.[0],
-        longitude: location?.[1],
-      });
+      };
+
+      if (breed) payload.breed = breed;
+      if (size) payload.size = size.toLowerCase();
+      if (imageUrl) payload.image_url = imageUrl;
+      if (location) {
+        payload.latitude = location[0];
+        payload.longitude = location[1];
+      }
+
+      await PetsService.updatePet(id, payload);
       navigate("/shelter/dashboard");
-    } catch (error) {
-      console.error(error);
-      alert("Error al actualizar la mascota.");
+    } catch (error: any) {
+      console.error("DETAILED ERROR:", error.response?.data || error);
+      const serverMessage = error.response?.data?.errors?.[0]?.message || 
+                           error.response?.data?.message || 
+                           "Error al actualizar la mascota";
+      alert(`Error: ${serverMessage}`);
     } finally {
       setLoading(false);
     }
@@ -163,6 +177,26 @@ const EditPetPage = () => {
                   }`}
                 >
                   {s}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          {/* Género */}
+          <Field label="Género *">
+            <div className="flex gap-2">
+              {GENDER_OPTIONS.map((g) => (
+                <button
+                  key={g.value}
+                  type="button"
+                  onClick={() => setGender(g.value)}
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
+                    gender === g.value
+                      ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
+                      : "border-gray-200 text-gray-400 hover:border-pink-300 hover:text-pink-500"
+                  }`}
+                >
+                  {g.label}
                 </button>
               ))}
             </div>
