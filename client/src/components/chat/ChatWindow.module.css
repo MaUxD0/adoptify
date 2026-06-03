@@ -77,8 +77,8 @@
 }
 
 .loadMoreBtn:hover:not(:disabled) {
-  border-color: #f97316;
-  color: #f97316;
+  border-color: #ec4899;
+  color: #ec4899;
 }
 
 .loadMoreBtn:disabled {
@@ -113,14 +113,14 @@
 }
 
 .bubbleMine {
-  background: linear-gradient(135deg, #f97316, #fb923c);
+  background: linear-gradient(135deg, #ec4899, #f472b6);
   color: #fff;
   border-radius: 18px 18px 4px 18px;
-  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.2);
 }
 
 .bubbleTheirs {
-  background: #f5f5f4;
+  background: #f3f4f6;
   color: #1c1917;
   border-radius: 18px 18px 18px 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -170,7 +170,7 @@
 }
 
 .textarea:focus {
-  border-color: #f97316;
+  border-color: #ec4899;
 }
 
 .textarea:disabled {
@@ -183,7 +183,7 @@
   height: 42px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, #f97316, #fb923c);
+  background: linear-gradient(135deg, #ec4899, #f472b6);
   color: #fff;
   font-size: 16px;
   cursor: pointer;
