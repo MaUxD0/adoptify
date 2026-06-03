@@ -85,8 +85,12 @@ export function AdoptionProvider({ children }: { children: ReactNode }) {
         const adoption = await adoptionService.createAdoption(payload);
         toast.success('Adoption request submitted successfully!');
         return adoption;
-      } catch (err) {
-        handleError(err, 'Failed to submit adoption request');
+      } catch (err: any) {
+        const message = err.response?.status === 409 
+          ? 'Ya has enviado una solicitud para esta mascota.' 
+          : 'Failed to submit adoption request';
+        setError(message);
+        toast.error(message);
         return null;
       } finally {
         setIsLoading(false);

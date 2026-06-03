@@ -1,7 +1,6 @@
 import { AppError } from '../../middlewares/error.middleware'
 import {
   RealtimeService,
-  type PetRealtimeEvent,
 } from '../../shared/realtime/realtime.service'
 import { PetsRepository } from './pets.repository'
 import type {
@@ -63,9 +62,9 @@ export class PetsService {
   }
 
   private async broadcast(
-    event: PetRealtimeEvent,
+    event: string,
     payload: { pet?: Pet; petId?: string },
   ): Promise<void> {
-    await this.realtime.emit(event, payload)
+    await this.realtime.emit(event, payload, 'pets-updates')
   }
 }

@@ -1,43 +1,31 @@
 import { supabaseAdmin } from '../../config/supabase'
 
-export const PETS_REALTIME_CHANNEL = 'pets-updates'
-
-export type PetRealtimeEvent = 'pet:created' | 'pet:updated' | 'pet:deleted'
-
-export interface PetRealtimePayload {
-  petId?: string
-  pet?: unknown
-}
+export const DEFAULT_REALTIME_CHANNEL = 'app-updates'
 
 export class RealtimeService {
-  private channel = supabaseAdmin.channel(PETS_REALTIME_CHANNEL)
-  private ready = false
-
-  async initialize(): Promise<void> {
-    if (this.ready) return
-
-    await new Promise<void>((resolve, reject) => {
-      this.channel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          this.ready = true
-          resolve()
-        }
-        if (status === 'CHANNEL_ERROR') {
-          reject(new Error('No se pudo suscribir al canal de realtime'))
-        }
-      })
-    })
-  }
-
-  async emit(event: PetRealtimeEvent, payload: PetRealtimePayload): Promise<void> {
-    if (!this.ready) {
-      await this.initialize()
-    }
-
-    await this.channel.send({
-      type: 'broadcast',
-      event,
-      payload,
+  /**
+   * Emite un evento de broadcast a través de Supabase
+   * @param event Nombre del evento (e.g., 'pet:created', 'adoption:updated')
+   * @param payload Datos a enviar
+   * @param channelName Nombre del canal (por defecto app-updates)
+   */
+  async emit(event: string, payload: any, channelName: string = DEFAULT_REALTIME_CHANNEL): Promise<void> {
+    const channel = supabaseAdmin.channel(channelName)
+    
+    // Nos suscribimos temporalmente para enviar el mensaje
+    // En broadcast de Supabase, el emisor no necesita estar suscrito permanentemente
+    // pero el canal debe estar inicializado.
+    
+    await channel.subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.send({
+          type: 'broadcast',
+          event,
+          payload,
+        })
+        // Opcional: limpiar el canal después de enviar
+        void supabaseAdmin.removeChannel(channel)
+      }
     })
   }
 }

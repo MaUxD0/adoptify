@@ -121,7 +121,17 @@ export const adoptionsRepository = {
       .from("adoption_requests")
       .update({ status })
       .eq("id", id)
-      .select()
+      .select(
+        `
+        *,
+        pets (
+          id,
+          name,
+          shelter_id,
+          image_url
+        )
+      `
+      )
       .single();
 
     if (error) throw error;
