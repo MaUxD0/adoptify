@@ -5,6 +5,7 @@ import { PetsService } from "../../services/pets.service";
 import Footer from "../../components/pet/Footer";
 import { useAdoptions } from "../../hooks/useAdoptions";
 import toast from "react-hot-toast";
+import { Map } from "../../components/ui/Map/Map";
 
 const FALLBACK_IMG = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=800&q=80";
 
@@ -165,25 +166,25 @@ const PetDetailsPage = () => {
           </div>
         </div>
 
-        {/* ── MAP PLACEHOLDER ── */}
-        <div className="mb-6 rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
-          <div className="bg-gray-100 h-40 flex flex-col items-center justify-center relative">
-            {/* Fake map grid */}
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage: "linear-gradient(#aaa 1px, transparent 1px), linear-gradient(90deg, #aaa 1px, transparent 1px)",
-                backgroundSize: "30px 30px",
-              }}
+        {/* ── MAP SECTION ── */}
+        <div className="mb-6">
+          <h2 className="flex items-center gap-2 text-gray-800 font-bold text-base mb-3">
+            <span className="text-lg">📍</span>
+            Adoption Center Location
+          </h2>
+          <div className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm h-48">
+            <Map 
+              readonly 
+              selectedLocation={pet.latitude && pet.longitude ? [pet.latitude, pet.longitude] : undefined}
+              center={pet.latitude && pet.longitude ? [pet.latitude, pet.longitude] : undefined}
+              zoom={15}
             />
-            <div className="relative z-10 text-center">
-              <p className="text-xs text-gray-400 mb-2">📍 Location</p>
-              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center mx-auto shadow-md">
-                <div className="w-2 h-2 bg-white rounded-full" />
-              </div>
-            </div>
-            <p className="absolute bottom-2 left-2 text-xs text-gray-400">View larger map</p>
           </div>
+          {!pet.latitude && (
+            <p className="text-xs text-gray-400 mt-2 italic text-center">
+              Location not specified by the shelter
+            </p>
+          )}
         </div>
 
         {/* ── ADOPT BUTTON ── */}

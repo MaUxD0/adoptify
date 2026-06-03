@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePets } from "../../hooks/usePets";
 import { PetsService } from "../../services/pets.service";
+import { Map } from "../../components/ui/Map/Map";
 
 const SPECIES_OPTIONS = ["Perro", "Gato", "Conejo", "Ave", "Otro"];
 const SIZE_OPTIONS = ["Pequeño", "Mediano", "Grande"];
@@ -23,6 +24,9 @@ const EditPetPage = () => {
   );
   const [description, setDescription] = useState(pet?.description ?? "");
   const [imageUrl, setImageUrl] = useState(pet?.image_url ?? "");
+  const [location, setLocation] = useState<[number, number] | null>(
+    pet?.latitude && pet?.longitude ? [pet.latitude, pet.longitude] : null
+  );
   const [loading, setLoading] = useState(false);
 
   const FALLBACK_IMG = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80";
@@ -52,6 +56,8 @@ const EditPetPage = () => {
         size: size.toLowerCase(),
         description,
         image_url: imageUrl,
+        latitude: location?.[0],
+        longitude: location?.[1],
       });
       navigate("/shelter/dashboard");
     } catch (error) {
@@ -170,6 +176,21 @@ const EditPetPage = () => {
               onChange={(e) => setImageUrl(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-pink-400 bg-white"
             />
+          </Field>
+
+          {/* Mapa de ubicación */}
+          <Field label="Ubicación del centro de adopción *">
+            <div className="h-64 rounded-xl overflow-hidden border border-gray-200 shadow-inner">
+              <Map 
+                selectedLocation={location || undefined}
+                onLocationSelect={(lat, lng) => setLocation([lat, lng])}
+              />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1 italic">
+              {location 
+                ? `📍 Coordenadas: ${location[0].toFixed(4)}, ${location[1].toFixed(4)}`
+                : "Haz clic en el mapa para marcar la ubicación del centro"}
+            </p>
           </Field>
 
           <Field label="Descripción *">

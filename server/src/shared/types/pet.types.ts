@@ -16,8 +16,10 @@ export interface Pet {
   size?: string | null
   gender?: string | null
   description: string
-  image_url?: string | null
-  status: PetStatus
+  image_url?: string
+  latitude?: number
+  longitude?: number
+  status?: PetStatus
   created_at: string
   shelter?: ShelterSummary
 }
@@ -31,6 +33,8 @@ export interface CreatePetDTO {
   gender?: string
   description: string
   image_url?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface UpdatePetDTO extends Partial<CreatePetDTO> {

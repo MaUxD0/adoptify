@@ -17,6 +17,8 @@ export interface Pet {
   gender?: string
   description: string
   image_url?: string
+  latitude?: number
+  longitude?: number
   status?: PetStatus
   created_at?: string
   shelter?: ShelterSummary

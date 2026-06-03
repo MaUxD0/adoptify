@@ -9,6 +9,8 @@ export const createPetSchema = z.object({
   gender: z.string().optional(),
   description: z.string().min(10),
   image_url: z.string().optional(),
+  latitude: z.coerce.number().optional(),
+  longitude: z.coerce.number().optional(),
 })
 
 export const updatePetSchema = createPetSchema.partial().extend({
