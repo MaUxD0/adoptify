@@ -95,8 +95,8 @@ const ShelterDashboardPage = () => {
 
   const stats = {
     total: visiblePets.length,
-    available: visiblePets.filter((p) => p.status === "available").length,
-    adopted: visiblePets.filter((p) => p.status === "adopted").length,
+    available: visiblePets.filter((p) => p.status === "AVAILABLE").length,
+    adopted: visiblePets.filter((p) => p.status === "ADOPTED").length,
   };
 
   return (
