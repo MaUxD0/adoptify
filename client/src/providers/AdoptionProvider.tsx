@@ -1,13 +1,18 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { toast } from 'react-hot-toast';
 import { adoptionService } from '../services/adoption.service';
+import { supabase } from '../api/supabase';
 import type {
   Adoption,
   AdoptionFilters,
   CreateAdoptionDto,
   PaginatedAdoptions,
 } from '../types/adoption.types';
+
+// ── Realtime Configuration ───────────────────────────────────────────────────
+
+const ADOPTIONS_CHANNEL = 'adoption_requests_realtime';
 
 // ── Context shape ─────────────────────────────────────────────────────────────
 
@@ -108,6 +113,37 @@ export function AdoptionProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       handleError(err, 'Failed to reject adoption');
     }
+  }, []);
+
+  // ── Realtime Subscription ──────────────────────────────────────────────────
+
+  useEffect(() => {
+    const channel = supabase.channel(ADOPTIONS_CHANNEL);
+
+    channel
+      .on('broadcast', { event: 'adoption:created' }, ({ payload }) => {
+        if (payload?.adoption) {
+          setAdoptions((prev) => [payload.adoption, ...prev]);
+          toast.success(`Nueva solicitud de adopción recibida!`);
+        }
+      })
+      .on('broadcast', { event: 'adoption:updated' }, ({ payload }) => {
+        if (payload?.adoption) {
+          setAdoptions((prev) =>
+            prev.map((a) => (a.id === payload.adoption.id ? payload.adoption : a))
+          );
+        }
+      })
+      .on('broadcast', { event: 'adoption:deleted' }, ({ payload }) => {
+        if (payload?.id) {
+          setAdoptions((prev) => prev.filter((a) => a.id !== payload.id));
+        }
+      })
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, []);
 
   return (

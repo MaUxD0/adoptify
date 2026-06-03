@@ -1,15 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-});
-
-// Adjunta el token de Supabase automáticamente
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+import api from '../api/axios';
 
 export const adoptionService = {
   // El backend saca el adopterId del token — no va en la URL
