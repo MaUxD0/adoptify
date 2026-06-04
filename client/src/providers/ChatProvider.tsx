@@ -131,15 +131,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       config: { broadcast: { self: false } }
     });
     
+    let isSubscribed = false;
+    
     channel
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
         console.log("ChatProvider: Received message event from", channelName, payload);
-        if (payload?.message) {
+        if (payload?.message && isSubscribed) {
           dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
         }
       })
       .subscribe((status) => {
         console.log("ChatProvider: Channel", channelName, "status:", status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribed = true;
+          console.log("ChatProvider: Successfully subscribed to", channelName);
+        }
         if (status === 'CHANNEL_ERROR') {
           console.error("ChatProvider: Channel error for", channelName);
         }

@@ -10,12 +10,20 @@ export class RealtimeService {
    * @param channelName Nombre del canal (por defecto app-updates)
    */
   async emit(event: string, payload: any, channelName: string = DEFAULT_REALTIME_CHANNEL): Promise<void> {
+    // Small delay to ensure clients have time to subscribe to the channel
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     const channel = supabaseAdmin.channel(channelName)
     
     return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error(`Timeout subscribing to channel ${channelName}`))
+      }, 5000)
+      
       channel.subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           try {
+            clearTimeout(timeout)
             await channel.send({
               type: 'broadcast',
               event,
@@ -24,13 +32,16 @@ export class RealtimeService {
             void supabaseAdmin.removeChannel(channel)
             resolve()
           } catch (err) {
+            clearTimeout(timeout)
             reject(err)
           }
         }
         if (status === 'CHANNEL_ERROR') {
+          clearTimeout(timeout)
           reject(new Error(`Error subscribing to channel ${channelName}`))
         }
       })
     })
   }
 }
+

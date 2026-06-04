@@ -1,13 +1,11 @@
 import { env } from './config/env'
 import app from './app'
-import { realtimeService } from './modules/pets/pets.routes'
 
 const start = async () => {
   try {
-    await realtimeService.initialize()
-    console.log('[Realtime] Canal pets-updates listo')
+    console.log('[Server] Starting on port', env.PORT)
   } catch (error) {
-    console.warn('[Realtime] No se pudo inicializar:', error)
+    console.warn('[Server] Error:', error)
   }
 
   app.listen(Number(env.PORT), () => {
