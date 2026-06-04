@@ -6,6 +6,9 @@ export interface UpdateProfileData {
   phone?: string
   city?: string
   bio?: string
+  shelter_id?: string
+  avatar_url?: string
+  cover_url?: string
 }
 
 export const usersService = {

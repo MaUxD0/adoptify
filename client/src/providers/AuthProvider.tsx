@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           role,
           shelter_id: role === 'SHELTER' ? (session.user.user_metadata?.shelter_id ?? session.user.id) : undefined,
           avatar_url: session.user.user_metadata?.avatar_url,
+          cover_url: session.user.user_metadata?.cover_url,
           created_at: session.user.created_at,
         };
 

@@ -10,6 +10,7 @@ export interface User {
   role: UserRole
   shelter_id?: string
   avatar_url?: string
+  cover_url?: string
   created_at: string
 }
 

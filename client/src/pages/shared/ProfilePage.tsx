@@ -10,12 +10,15 @@ const ProfilePage = () => {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
 
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploadingPhoto, setUploadingPhoto] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
   const [success, setSuccess] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url ?? '')
+  const [coverUrl, setCoverUrl] = useState(user?.cover_url ?? '')
   const [formData, setFormData] = useState({
     full_name: user?.full_name ?? '',
     phone: '',
@@ -36,6 +39,7 @@ const ProfilePage = () => {
           shelter_id: profile.shelter_id || '',
         })
         if (profile.avatar_url) setAvatarUrl(profile.avatar_url)
+        if (profile.cover_url) setCoverUrl(profile.cover_url)
       } catch (err) {
         console.error('Error fetching profile:', err)
       }
@@ -57,10 +61,28 @@ const ProfilePage = () => {
       if (error) throw error
       const { data } = supabase.storage.from('avatars').getPublicUrl(path)
       const url = `${data.publicUrl}?t=${Date.now()}`
-      await usersService.updateMyProfile({ avatar_url: url } as never)
+      await usersService.updateMyProfile({ avatar_url: url })
       setAvatarUrl(url)
     } finally {
       setUploadingPhoto(false)
+    }
+  }
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setUploadingCover(true)
+    try {
+      const ext = file.name.split('.').pop()
+      const path = `covers/${user.id}.${ext}`
+      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+      if (error) throw error
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+      const url = `${data.publicUrl}?t=${Date.now()}`
+      await usersService.updateMyProfile({ cover_url: url })
+      setCoverUrl(url)
+    } finally {
+      setUploadingCover(false)
     }
   }
 
@@ -114,8 +136,21 @@ const ProfilePage = () => {
 
       {/* HERO */}
       <section className="relative h-44 overflow-hidden">
-        <img src={HERO_IMG} alt="Profile hero" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={coverUrl || HERO_IMG} alt="Profile hero" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-linear-to-b from-black/10 via-black/30 to-black/60" />
+        {uploadingCover && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-7 w-7 border-2 border-white border-t-transparent" />
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => coverInputRef.current?.click()}
+          className="absolute right-4 bottom-4 rounded-full bg-white/90 px-3 py-2 text-xs font-bold text-gray-700 shadow-sm hover:bg-white transition-colors"
+        >
+          Change cover
+        </button>
+        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
       </section>
 
       {/* MAIN CARD */}
@@ -157,7 +192,7 @@ const ProfilePage = () => {
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
           </div>
           <div>
-            <h2 className="text-gray-800 text-lg font-black leading-tight">{user.full_name}</h2>
+            <h2 className="text-gray-800 text-lg font-black leading-tight">{formData.full_name || user.full_name}</h2>
             <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
             <span className={`inline-block mt-1.5 text-xs font-bold px-3 py-0.5 rounded-full ${
               user.role === 'SHELTER'
