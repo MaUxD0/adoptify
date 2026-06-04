@@ -58,13 +58,13 @@ export const chatRepository = {
       .from('messages')
       .select('*', { count: 'exact' })
       .eq('chat_id', chatId)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
       .range(from, to);
 
     if (error) throw error;
 
     return {
-      data: data ?? [],
+      data: (data ?? []).reverse(),
       total: count ?? 0,
       page,
       limit,

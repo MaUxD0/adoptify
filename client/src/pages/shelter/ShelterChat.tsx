@@ -1,11 +1,10 @@
 import { ConversationList } from '../../components/chat/ConversationList';
 import { ChatWindow } from '../../components/chat/ChatWindow';
 import { useConversations, useChat } from '../../hooks/useChat';
-
-// TODO: Replace with real auth context value once auth module is integrated
-const CURRENT_USER_ID = 'REPLACE_WITH_AUTH_CONTEXT';
+import { useAuth } from '../../hooks/useAuth';
 
 export function ShelterChat() {
+  const { user } = useAuth();
   const {
     conversations,
     isLoading: conversationsLoading,
@@ -24,6 +23,10 @@ export function ShelterChat() {
     loadMore,
   } = useChat();
 
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <main className="shelter-chat-layout">
       <aside className="chat-sidebar">
@@ -33,7 +36,7 @@ export function ShelterChat() {
           conversations={conversations}
           activeConversationId={activeConversationId}
           isLoading={conversationsLoading}
-          currentUserId={CURRENT_USER_ID}
+          currentUserId={user.id}
           onSelect={open}
         />
       </aside>
@@ -45,7 +48,7 @@ export function ShelterChat() {
             hasMore={hasMore}
             isLoading={messagesLoading}
             isSending={isSending}
-            currentUserId={CURRENT_USER_ID}
+            currentUserId={user.id}
             conversationTitle={
               conversation.adopter?.name
                 ? `Chat with ${conversation.adopter.name}`

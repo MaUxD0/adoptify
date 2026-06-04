@@ -87,12 +87,21 @@ function reducer(state: ChatState, action: ChatAction): ChatState {
       if (!action.payload) return { ...state, isSending: false };
       // Avoid duplicate: check if already exists
       if (state.messages.find(m => m.id === action.payload!.id)) return { ...state, isSending: false };
-      return { ...state, isSending: false, messages: [...state.messages, action.payload] };
+      return {
+        ...state,
+        isSending: false,
+        messages: [...state.messages, action.payload],
+        messagesTotal: state.messagesTotal + 1,
+      };
     case 'MESSAGE_RECEIVED':
       if (state.activeConversationId !== action.payload.chat_id) return state;
       // Avoid duplicate: check if already exists
       if (state.messages.find(m => m.id === action.payload.id)) return state;
-      return { ...state, messages: [...state.messages, action.payload] };
+      return {
+        ...state,
+        messages: [...state.messages, action.payload],
+        messagesTotal: state.messagesTotal + 1,
+      };
     case 'SET_ACTIVE':
       return { ...state, activeConversationId: action.payload, messages: [], messagesPage: 1, messagesTotal: 0 };
     case 'CLOSE':
