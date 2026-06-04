@@ -158,8 +158,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [state.activeConversationId]);
 
   const loadConversations = useCallback(async () => {
+    console.log("ChatProvider: Loading conversations...");
     dispatch({ type: 'CONVERSATIONS_LOADING' });
     const conversations = await chatService.getConversations();
+    console.log("ChatProvider: Loaded", conversations.length, "conversations");
     dispatch({ type: 'CONVERSATIONS_SUCCESS', payload: conversations });
   }, []);
 
