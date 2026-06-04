@@ -10,8 +10,6 @@ import { chatService } from '../services/chat.service';
 import { supabase } from '../api/supabase';
 import { useAuth } from '../hooks/useAuth';
 
-const CHAT_CHANNEL = 'chat_messages_realtime';
-
 interface Conversation {
   id: string;
   adopter_id: string;
@@ -120,33 +118,35 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { user } = useAuth();
 
-  // Realtime
+  // Realtime subscription for active conversation
   useEffect(() => {
-    if (!user?.id) return;
-    console.log("ChatProvider: Subscribing to channel", CHAT_CHANNEL);
-    const channel = supabase.channel(CHAT_CHANNEL, {
+    if (!state.activeConversationId) {
+      return;
+    }
+
+    const channelName = `chat_${state.activeConversationId}`;
+    console.log("ChatProvider: Subscribing to channel", channelName);
+    
+    const channel = supabase.channel(channelName, {
       config: { broadcast: { self: false } }
     });
+    
     channel
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
-        console.log("ChatProvider: Message received via realtime", payload);
+        console.log("ChatProvider: MESSAGE_CREATED payload received:", payload);
         if (payload?.message) {
-          // If the message is not from me, add it.
-          // The sender handles the optimistic update via SEND_SUCCESS.
-          if (payload.message.sender_id !== user.id) {
-            dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
-          }
+          dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
         }
       })
       .subscribe((status) => {
-        console.log("ChatProvider: Subscription status:", status);
+        console.log("ChatProvider: Subscription status for", channelName, ":", status);
       });
 
     return () => {
-      console.log("ChatProvider: Unsubscribing from channel");
+      console.log("ChatProvider: Unsubscribing from channel", channelName);
       void supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [state.activeConversationId]);
 
   const loadConversations = useCallback(async () => {
     dispatch({ type: 'CONVERSATIONS_LOADING' });

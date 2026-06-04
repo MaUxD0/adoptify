@@ -2,7 +2,6 @@ import { chatRepository } from './chat.repository';
 import { RealtimeService } from '../../shared/realtime/realtime.service';
 
 const realtime = new RealtimeService();
-const CHAT_CHANNEL = 'chat_messages_realtime';
 
 export class ConversationNotFoundError extends Error {
   constructor(id: string) {
@@ -50,7 +49,9 @@ export const chatService = {
     if (!isParticipant) throw new ConversationForbiddenError();
 
     const message = await chatRepository.sendMessage(conversationId, senderId, content);
-    await realtime.emit('message:created', { message }, CHAT_CHANNEL);
+    // Emit to conversation-specific channel
+    const channelName = `chat_${conversationId}`;
+    await realtime.emit('message:created', { message }, channelName);
     return message;
   },
 
