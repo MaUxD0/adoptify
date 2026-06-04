@@ -22,4 +22,14 @@ export const usersController = {
       res.status(400).json({ error: msg })
     }
   },
+
+  async uploadProfileImage(req: AuthRequest, res: Response) {
+    try {
+      const updated = await usersService.uploadProfileImage(req.user!.id, req.body)
+      res.json({ profile: updated, message: 'Imagen actualizada' })
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Error interno'
+      res.status(400).json({ error: msg })
+    }
+  },
 }

@@ -11,6 +11,12 @@ export interface UpdateProfileData {
   cover_url?: string
 }
 
+export interface UploadProfileImageData {
+  type: 'avatar' | 'cover'
+  fileName: string
+  dataUrl: string
+}
+
 export const usersService = {
   async getMyProfile(): Promise<User> {
     const { data } = await axiosInstance.get('/users/profile')
@@ -19,6 +25,11 @@ export const usersService = {
 
   async updateMyProfile(updates: UpdateProfileData): Promise<User> {
     const { data } = await axiosInstance.patch('/users/profile', updates)
+    return data.profile
+  },
+
+  async uploadProfileImage(payload: UploadProfileImageData): Promise<User> {
+    const { data } = await axiosInstance.post('/users/profile/image', payload)
     return data.profile
   },
 }

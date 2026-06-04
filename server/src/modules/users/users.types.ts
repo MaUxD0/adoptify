@@ -21,3 +21,9 @@ export interface UpdateProfileBody {
   avatar_url?: string
   cover_url?: string
 }
+
+export interface UploadProfileImageBody {
+  type: 'avatar' | 'cover'
+  fileName: string
+  dataUrl: string
+}

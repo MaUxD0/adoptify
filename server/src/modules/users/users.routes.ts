@@ -8,5 +8,6 @@ router.use(authMiddleware)
 
 router.get('/profile', usersController.getMyProfile)
 router.patch('/profile', usersController.updateMyProfile)
+router.post('/profile/image', usersController.uploadProfileImage)
 
 export default router

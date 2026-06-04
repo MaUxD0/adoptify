@@ -2,9 +2,16 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { usersService } from '../../services/users.service'
-import { supabase } from '../../api/supabase'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800&q=80'
+
+const fileToDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result))
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
 
 const ProfilePage = () => {
   const { user, logout } = useAuth()
@@ -55,14 +62,12 @@ const ProfilePage = () => {
     if (!file || !user) return
     setUploadingPhoto(true)
     try {
-      const ext = file.name.split('.').pop()
-      const path = `avatars/${user.id}.${ext}`
-      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-      if (error) throw error
-      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-      const url = `${data.publicUrl}?t=${Date.now()}`
-      await usersService.updateMyProfile({ avatar_url: url })
-      setAvatarUrl(url)
+      const profile = await usersService.uploadProfileImage({
+        type: 'avatar',
+        fileName: file.name,
+        dataUrl: await fileToDataUrl(file),
+      })
+      setAvatarUrl(profile.avatar_url ?? '')
     } finally {
       setUploadingPhoto(false)
     }
@@ -73,14 +78,12 @@ const ProfilePage = () => {
     if (!file || !user) return
     setUploadingCover(true)
     try {
-      const ext = file.name.split('.').pop()
-      const path = `covers/${user.id}.${ext}`
-      const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-      if (error) throw error
-      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-      const url = `${data.publicUrl}?t=${Date.now()}`
-      await usersService.updateMyProfile({ cover_url: url })
-      setCoverUrl(url)
+      const profile = await usersService.uploadProfileImage({
+        type: 'cover',
+        fileName: file.name,
+        dataUrl: await fileToDataUrl(file),
+      })
+      setCoverUrl(profile.cover_url ?? '')
     } finally {
       setUploadingCover(false)
     }
