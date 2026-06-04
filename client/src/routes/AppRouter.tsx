@@ -20,6 +20,7 @@ const ChatsListPage = lazy(() => import('../pages/adopter/ChatListPage'))
 
 const ShelterDashboardPage = lazy(() => import('../pages/shelter/ShelterDashboardPage'))
 const ShelterProfilePage = lazy(() => import('../pages/shelter/ShelterProfilePage'))
+const ShelterChat = lazy(() => import('../pages/shelter/ShelterChat'))
 const CreatePetPage = lazy(() => import('../pages/shelter/CreatePetPage'))
 const EditPetPage = lazy(() => import('../pages/shelter/EditPetPage'))
 const AdoptionRequestsPage = lazy(() => import('../pages/shelter/AdoptionRequestsPage'))
@@ -58,6 +59,7 @@ const AppRouter = () => {
           <Route path="/shelter" element={<Navigate to="/shelter/dashboard" replace />} />
           <Route path="/shelter/dashboard" element={<ShelterDashboardPage />} />
           <Route path="/shelter/profile" element={<ShelterProfilePage />} />
+          <Route path="/shelter/chat" element={<ShelterChat />} />
           <Route path="/shelter/create-pet" element={<CreatePetPage />} />
           <Route path="/shelter/edit-pet/:id" element={<EditPetPage />} />
           <Route path="/shelter/requests" element={<AdoptionRequestsPage />} />

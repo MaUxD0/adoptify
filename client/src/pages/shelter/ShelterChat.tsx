@@ -65,3 +65,5 @@ export function ShelterChat() {
     </main>
   );
 }
+
+export default ShelterChat;
