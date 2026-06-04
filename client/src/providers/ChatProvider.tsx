@@ -4,7 +4,6 @@ import {
   useContext,
   useEffect,
   useReducer,
-  useRef,
   type ReactNode,
 } from 'react';
 import { chatService } from '../services/chat.service';
@@ -50,8 +49,7 @@ type ChatAction =
   | { type: 'SEND_START' }
   | { type: 'SEND_SUCCESS'; payload: Message | null }
   | { type: 'SET_ACTIVE'; payload: string }
-  | { type: 'CLOSE' }
-  | { type: 'MERGE_MESSAGES'; payload: Message[] };
+  | { type: 'CLOSE' };
 
 const initialState: ChatState = {
   conversations: [],
@@ -99,11 +97,6 @@ function reducer(state: ChatState, action: ChatAction): ChatState {
       return { ...state, activeConversationId: action.payload, messages: [], messagesPage: 1, messagesTotal: 0 };
     case 'CLOSE':
       return { ...state, activeConversationId: null, messages: [], messagesPage: 1, messagesTotal: 0 };
-    case 'MERGE_MESSAGES':
-      // Merge messages that arrived via realtime with those already loaded
-      const ids = new Set(state.messages.map(m => m.id));
-      const newMessages = action.payload.filter(m => !ids.has(m.id));
-      return { ...state, messages: [...state.messages, ...newMessages] };
     default:
       return state;
   }
@@ -124,19 +117,15 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const realtimeMessagesRef = useRef<Map<string, Message>>(new Map());
 
-  // Realtime subscription for active conversation
+  // Setup realtime subscription when conversation is active
   useEffect(() => {
     if (!state.activeConversationId) {
       return;
     }
 
     const channelName = `chat_${state.activeConversationId}`;
-    console.log("ChatProvider: Subscribing to channel", channelName);
-    
-    // Clear the realtime messages buffer when opening a new conversation
-    realtimeMessagesRef.current.clear();
+    console.log("ChatProvider: Setting up subscription to", channelName);
     
     const channel = supabase.channel(channelName, {
       config: { broadcast: { self: false } }
@@ -144,35 +133,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     
     channel
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
-        console.log("ChatProvider: MESSAGE_CREATED payload received:", payload);
+        console.log("ChatProvider: Received message event from", channelName, payload);
         if (payload?.message) {
-          // If messages are still loading, buffer them. Otherwise dispatch immediately.
-          if (state.messagesLoading) {
-            realtimeMessagesRef.current.set(payload.message.id, payload.message);
-          } else {
-            dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
-          }
+          dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
         }
       })
       .subscribe((status) => {
-        console.log("ChatProvider: Subscription status for", channelName, ":", status);
+        console.log("ChatProvider: Channel", channelName, "status:", status);
+        if (status === 'CHANNEL_ERROR') {
+          console.error("ChatProvider: Channel error for", channelName);
+        }
       });
 
     return () => {
-      console.log("ChatProvider: Unsubscribing from channel", channelName);
-      void supabase.removeChannel(channel);
+      console.log("ChatProvider: Cleaning up subscription to", channelName);
+      supabase.removeChannel(channel);
     };
-  }, [state.activeConversationId, state.messagesLoading]);
-
-  // Merge buffered realtime messages after loading completes
-  useEffect(() => {
-    if (!state.messagesLoading && realtimeMessagesRef.current.size > 0) {
-      const bufferedMessages = Array.from(realtimeMessagesRef.current.values());
-      console.log("ChatProvider: Merging buffered messages:", bufferedMessages.length);
-      dispatch({ type: 'MERGE_MESSAGES', payload: bufferedMessages });
-      realtimeMessagesRef.current.clear();
-    }
-  }, [state.messagesLoading]);
+  }, [state.activeConversationId]);
 
   const loadConversations = useCallback(async () => {
     dispatch({ type: 'CONVERSATIONS_LOADING' });
