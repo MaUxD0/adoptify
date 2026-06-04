@@ -123,9 +123,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   // Realtime
   useEffect(() => {
     if (!user?.id) return;
-    const channel = supabase.channel(CHAT_CHANNEL);
+    console.log("ChatProvider: Subscribing to channel", CHAT_CHANNEL);
+    const channel = supabase.channel(CHAT_CHANNEL, {
+      config: { broadcast: { self: false } }
+    });
     channel
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
+        console.log("ChatProvider: Message received via realtime", payload);
         if (payload?.message) {
           // If the message is not from me, add it.
           // The sender handles the optimistic update via SEND_SUCCESS.
@@ -134,9 +138,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           }
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log("ChatProvider: Subscription status:", status);
+      });
 
     return () => {
+      console.log("ChatProvider: Unsubscribing from channel");
       void supabase.removeChannel(channel);
     };
   }, [user?.id]);
