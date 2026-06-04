@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useReducer,
+  useRef,
   type ReactNode,
 } from 'react';
 import { chatService } from '../services/chat.service';
@@ -47,9 +48,10 @@ type ChatAction =
   | { type: 'MESSAGES_SUCCESS'; payload: { messages: Message[]; total: number; page: number; prepend: boolean } }
   | { type: 'MESSAGE_RECEIVED'; payload: Message }
   | { type: 'SEND_START' }
-  | { type: 'SEND_SUCCESS'; payload: Message }
+  | { type: 'SEND_SUCCESS'; payload: Message | null }
   | { type: 'SET_ACTIVE'; payload: string }
-  | { type: 'CLOSE' };
+  | { type: 'CLOSE' }
+  | { type: 'MERGE_MESSAGES'; payload: Message[] };
 
 const initialState: ChatState = {
   conversations: [],
@@ -83,8 +85,10 @@ function reducer(state: ChatState, action: ChatAction): ChatState {
     case 'SEND_START':
       return { ...state, isSending: true };
     case 'SEND_SUCCESS':
+      // If error, just reset isSending
+      if (!action.payload) return { ...state, isSending: false };
       // Avoid duplicate: check if already exists
-      if (state.messages.find(m => m.id === action.payload.id)) return state;
+      if (state.messages.find(m => m.id === action.payload!.id)) return { ...state, isSending: false };
       return { ...state, isSending: false, messages: [...state.messages, action.payload] };
     case 'MESSAGE_RECEIVED':
       if (state.activeConversationId !== action.payload.chat_id) return state;
@@ -95,6 +99,11 @@ function reducer(state: ChatState, action: ChatAction): ChatState {
       return { ...state, activeConversationId: action.payload, messages: [], messagesPage: 1, messagesTotal: 0 };
     case 'CLOSE':
       return { ...state, activeConversationId: null, messages: [], messagesPage: 1, messagesTotal: 0 };
+    case 'MERGE_MESSAGES':
+      // Merge messages that arrived via realtime with those already loaded
+      const ids = new Set(state.messages.map(m => m.id));
+      const newMessages = action.payload.filter(m => !ids.has(m.id));
+      return { ...state, messages: [...state.messages, ...newMessages] };
     default:
       return state;
   }
@@ -115,6 +124,7 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const realtimeMessagesRef = useRef<Map<string, Message>>(new Map());
 
   // Realtime subscription for active conversation
   useEffect(() => {
@@ -125,6 +135,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const channelName = `chat_${state.activeConversationId}`;
     console.log("ChatProvider: Subscribing to channel", channelName);
     
+    // Clear the realtime messages buffer when opening a new conversation
+    realtimeMessagesRef.current.clear();
+    
     const channel = supabase.channel(channelName, {
       config: { broadcast: { self: false } }
     });
@@ -133,7 +146,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
         console.log("ChatProvider: MESSAGE_CREATED payload received:", payload);
         if (payload?.message) {
-          dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
+          // If messages are still loading, buffer them. Otherwise dispatch immediately.
+          if (state.messagesLoading) {
+            realtimeMessagesRef.current.set(payload.message.id, payload.message);
+          } else {
+            dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
+          }
         }
       })
       .subscribe((status) => {
@@ -144,7 +162,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       console.log("ChatProvider: Unsubscribing from channel", channelName);
       void supabase.removeChannel(channel);
     };
-  }, [state.activeConversationId]);
+  }, [state.activeConversationId, state.messagesLoading]);
+
+  // Merge buffered realtime messages after loading completes
+  useEffect(() => {
+    if (!state.messagesLoading && realtimeMessagesRef.current.size > 0) {
+      const bufferedMessages = Array.from(realtimeMessagesRef.current.values());
+      console.log("ChatProvider: Merging buffered messages:", bufferedMessages.length);
+      dispatch({ type: 'MERGE_MESSAGES', payload: bufferedMessages });
+      realtimeMessagesRef.current.clear();
+    }
+  }, [state.messagesLoading]);
 
   const loadConversations = useCallback(async () => {
     dispatch({ type: 'CONVERSATIONS_LOADING' });
@@ -155,11 +183,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const openConversation = useCallback(async (id: string) => {
     dispatch({ type: 'SET_ACTIVE', payload: id });
     dispatch({ type: 'MESSAGES_LOADING' });
-    const result = await chatService.getMessages(id, 1);
-    dispatch({
-      type: 'MESSAGES_SUCCESS',
-      payload: { messages: result.data, total: result.total, page: 1, prepend: false },
-    });
+    try {
+      const result = await chatService.getMessages(id, 1);
+      dispatch({
+        type: 'MESSAGES_SUCCESS',
+        payload: { messages: result.data, total: result.total, page: 1, prepend: false },
+      });
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
   }, []);
 
   const openOrCreateConversation = useCallback(async (adopterId: string, shelterId: string, petId: string) => {
@@ -187,8 +219,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const { activeConversationId } = state;
     if (!activeConversationId || !content.trim()) return;
     dispatch({ type: 'SEND_START' });
-    const message = await chatService.sendMessage(activeConversationId, content.trim());
-    dispatch({ type: 'SEND_SUCCESS', payload: message });
+    try {
+      const message = await chatService.sendMessage(activeConversationId, content.trim());
+      dispatch({ type: 'SEND_SUCCESS', payload: message });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Reset isSending on error
+      dispatch({ type: 'SEND_SUCCESS', payload: null });
+    }
   }, [state]);
 
   const activeConversation = state.conversations.find(c => c.id === state.activeConversationId) ?? null;
