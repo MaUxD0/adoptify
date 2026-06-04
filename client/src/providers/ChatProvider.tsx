@@ -8,7 +8,6 @@ import {
 } from 'react';
 import { chatService } from '../services/chat.service';
 import { supabase } from '../api/supabase';
-import { useAuth } from '../hooks/useAuth';
 
 interface Conversation {
   id: string;
@@ -116,7 +115,6 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { user } = useAuth();
 
   // Realtime subscription for active conversation
   useEffect(() => {
