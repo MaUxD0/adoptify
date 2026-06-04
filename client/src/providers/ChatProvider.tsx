@@ -164,10 +164,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const openConversation = useCallback(async (id: string) => {
+    console.log("ChatProvider: Opening conversation with ID:", id);
     dispatch({ type: 'SET_ACTIVE', payload: id });
     dispatch({ type: 'MESSAGES_LOADING' });
     try {
       const result = await chatService.getMessages(id, 1);
+      console.log("ChatProvider: Messages loaded for conversation", id, "Total:", result.total);
       dispatch({
         type: 'MESSAGES_SUCCESS',
         payload: { messages: result.data, total: result.total, page: 1, prepend: false },
