@@ -33,6 +33,7 @@ export function ConversationList({
   conversations,
   activeConversationId,
   isLoading,
+  currentUserId,
   onSelect,
 }: Props) {
   if (isLoading) {
@@ -57,7 +58,11 @@ export function ConversationList({
     <ul className={styles.list}>
       {conversations.map((conv) => {
         const isActive = conv.id === activeConversationId;
-        const name = conv.adopter?.name ?? 'Adopter';
+        
+        // Determinar el nombre a mostrar (el de la otra persona)
+        const isAdopter = currentUserId === conv.adopter_id;
+        const otherParty = isAdopter ? conv.shelter : conv.adopter;
+        const name = otherParty?.name ?? (isAdopter ? 'Shelter' : 'Adopter');
         const pet = conv.pet?.name;
 
         return (

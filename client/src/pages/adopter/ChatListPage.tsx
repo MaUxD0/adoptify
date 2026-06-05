@@ -33,6 +33,9 @@ export default function ChatsListPage() {
     setActiveChatId(id);
   };
 
+  const activeConversation = conversations.find(c => c.id === activeChatId);
+  const otherPartyName = activeConversation?.shelter?.name || "Shelter";
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -67,7 +70,7 @@ export default function ChatsListPage() {
               isLoading={messagesLoading}
               isSending={isSending}
               currentUserId={user?.id || ""}
-              conversationTitle="Chat"
+              conversationTitle={`Chat with ${otherPartyName}`}
               onSend={sendMessage}
               onLoadMore={loadMoreMessages}
               onClose={() => setActiveChatId(null)}

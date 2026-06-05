@@ -16,6 +16,7 @@ export default function ChatPage() {
     sendMessage,
     loadMoreMessages,
     openConversation,
+    conversations,
   } = useChatContext();
 
   useEffect(() => {
@@ -26,6 +27,9 @@ export default function ChatPage() {
     }
   }, [id]);
 
+  const activeConversation = conversations.find(c => c.id === id);
+  const otherPartyName = activeConversation?.shelter?.name || "Shelter";
+
   return (
     <div className="h-screen">
       <ChatWindow
@@ -34,7 +38,7 @@ export default function ChatPage() {
         isLoading={messagesLoading}
         isSending={isSending}
         currentUserId={user?.id || ""}
-        conversationTitle="Chat"
+        conversationTitle={`Chat with ${otherPartyName}`}
         onSend={sendMessage}
         onLoadMore={loadMoreMessages}
         onClose={() => navigate(-1)}
