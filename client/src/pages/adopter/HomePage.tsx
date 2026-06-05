@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useMemo } from "react";
+import { type ReactNode, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Footer from "../../components/pet/Footer";
