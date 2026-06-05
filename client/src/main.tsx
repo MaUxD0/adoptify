@@ -5,13 +5,16 @@ import App from './App'
 import './index.css'
 import { PetsProvider } from './providers/PetsProvider'
 import { AuthProvider } from './providers/AuthProvider'
+import { FavoritesProvider } from './providers/FavoritesProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <PetsProvider>
-          <App />
+          <FavoritesProvider>
+            <App />
+          </FavoritesProvider>
         </PetsProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useFavorites } from '../../hooks/useFavorites'
+import { PetCard } from '../../components/pet/PetCard'
 import { usersService } from '../../services/users.service'
 
 const HERO_IMG = 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800&q=80'
@@ -15,6 +17,7 @@ const fileToDataUrl = (file: File) =>
 
 const ProfilePage = () => {
   const { user, logout } = useAuth()
+  const { favorites } = useFavorites()
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
@@ -308,6 +311,31 @@ const ProfilePage = () => {
           </div>
         )}
       </div>
+
+      {/* FAVORITES SECTION */}
+      {user.role === 'ADOPTER' && (
+        <section className="px-5 mb-10">
+          <h3 className="text-pink-500 font-black text-xl mb-4">My Favorites ❤️</h3>
+          {favorites.length === 0 ? (
+            <div className="bg-gray-50 border-2 border-dashed border-gray-100 rounded-3xl py-12 text-center">
+              <p className="text-4xl mb-3">🐾</p>
+              <p className="text-gray-400 font-medium">You haven't favorited any pets yet.</p>
+              <button 
+                onClick={() => navigate('/home')}
+                className="mt-4 text-pink-500 text-sm font-bold hover:underline"
+              >
+                Go find some friends!
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {favorites.map(pet => (
+                <PetCard key={pet.id} pet={pet} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* BOTTOM NAV */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 px-4 pb-safe">

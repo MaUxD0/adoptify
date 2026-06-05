@@ -5,6 +5,7 @@ import Footer from "../../components/pet/Footer";
 import PetCard from "../../components/pet/PetCard";
 import PetFilters from "../../components/pet/PetFilters";
 import { usePets } from "../../hooks/usePets";
+import { useFavorites } from "../../hooks/useFavorites";
 
 const HERO_IMG =
   "https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&q=80";
@@ -36,6 +37,7 @@ const HomePage = () => {
   const { filteredPets, loading, searchQuery, setSearchQuery } = usePets();
 
   const [showCommunityModal, setShowCommunityModal] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [msgIndex] = useState(() =>
     Math.floor(Math.random() * COMMUNITY_MESSAGES.length)
   );
@@ -50,6 +52,52 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+      {/* ── SIDE MENU ── */}
+      {showMenu && (
+        <div className="fixed inset-0 z-[100] flex">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowMenu(false)} />
+          <div className="relative w-72 bg-white h-full shadow-2xl animate-slide-right flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <span className="text-xl font-black text-gray-900">Menu</span>
+              <button onClick={() => setShowMenu(false)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              <button onClick={() => navigate("/adopter/profile")} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 transition-colors text-gray-700 font-medium">
+                <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                My Profile
+              </button>
+              <button onClick={() => navigate("/applications")} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 transition-colors text-gray-700 font-medium">
+                <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                My Applications
+              </button>
+              <div className="h-px bg-gray-100 my-2 mx-4" />
+              <div className="px-4 py-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Favorites</p>
+                <FavoritesList />
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-100">
+              <button onClick={() => navigate("/login")} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-red-50 transition-colors text-red-500 font-medium">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 px-5 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-1">
@@ -65,7 +113,10 @@ const HomePage = () => {
           </span>
         </Link>
 
-        <button className="text-gray-600 hover:text-pink-500 transition-colors">
+        <button 
+          onClick={() => setShowMenu(true)}
+          className="text-gray-600 hover:text-pink-500 transition-colors"
+        >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
@@ -350,5 +401,53 @@ const NavItem = ({
     <span className="text-[10px] font-medium">{label}</span>
   </button>
 );
+
+const FavoritesList = () => {
+  const { favorites, toggleFavorite } = useFavorites();
+  const navigate = useNavigate();
+
+  if (favorites.length === 0) {
+    return (
+      <div className="py-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100">
+        <p className="text-2xl mb-2">💔</p>
+        <p className="text-gray-400 text-xs font-medium">No favorites yet</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {favorites.map((pet) => (
+        <div key={pet.id} className="group relative bg-white border border-gray-100 rounded-2xl p-2 flex items-center gap-3 hover:shadow-md transition-all">
+          <img 
+            src={pet.image_url || "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"} 
+            className="w-12 h-12 rounded-xl object-cover" 
+            alt={pet.name} 
+          />
+          <div className="flex-1 min-w-0">
+            <h4 className="text-xs font-bold text-gray-900 truncate">{pet.name}</h4>
+            <p className="text-[10px] text-gray-400 truncate">{pet.breed || pet.species}</p>
+          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(pet);
+            }}
+            className="p-2 text-pink-500 hover:bg-pink-50 rounded-full transition-colors"
+          >
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+          </button>
+          <button 
+            onClick={() => navigate(`/pets/${pet.id}`)}
+            className="absolute inset-0 z-0"
+            aria-label={`View ${pet.name}`}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default HomePage;

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Pet } from '../../shared/types/pet.types'
+import { useFavorites } from '../../hooks/useFavorites'
 
 interface PetCardProps {
   pet: Pet
@@ -10,10 +11,18 @@ const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80'
 
 export const PetCard = ({ pet, onFavorite }: PetCardProps) => {
+  const { toggleFavorite, isFavorite } = useFavorites()
+  const active = isFavorite(pet.id)
+
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    onFavorite?.(pet.id)
+    
+    if (onFavorite) {
+      onFavorite(pet.id)
+    } else {
+      toggleFavorite(pet)
+    }
   }
 
   return (
@@ -45,10 +54,10 @@ export const PetCard = ({ pet, onFavorite }: PetCardProps) => {
           <button
             type="button"
             onClick={handleFavorite}
-            className="text-gray-300 hover:text-pink-500 transition-colors flex-shrink-0 mt-0.5"
+            className={`${active ? 'text-pink-500' : 'text-gray-300'} hover:text-pink-500 transition-colors flex-shrink-0 mt-0.5`}
             aria-label={`Marcar favorito a ${pet.name}`}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
           </button>

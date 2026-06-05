@@ -1,6 +1,7 @@
 
 import { useNavigate, useParams } from "react-router-dom";
 import { usePets } from "../../hooks/usePets";
+import { useFavorites } from "../../hooks/useFavorites";
 import { PetsService } from "../../services/pets.service";
 import Footer from "../../components/pet/Footer";
 import { useAdoptions } from "../../hooks/useAdoptions";
@@ -16,14 +17,13 @@ const PetDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { pets } = usePets();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const { submit } = useAdoptions();
   const pet = pets.find((p) => p.id === id);
+  const active = pet ? isFavorite(pet.id) : false;
 
   const handleAdopt = async () => {
     try {
-      console.log("PET COMPLETA:", pet);
-      console.log("PET ID:", pet?.id);
-
       if (!pet?.id) {
         toast.error("La mascota no tiene ID");
         return;
@@ -36,11 +36,8 @@ const PetDetailsPage = () => {
 
       toast.success("Solicitud enviada");
     } catch (error) {
-  const err = error as { response?: { data?: unknown } };
-  console.error(
-    "ERROR BACKEND:",
-    err?.response?.data || error
-  );
+      const err = error as { response?: { data?: unknown } };
+      console.error("ERROR BACKEND:", err?.response?.data || error);
       toast.error("Error al enviar la solicitud");
     }
   };
@@ -90,11 +87,14 @@ const PetDetailsPage = () => {
           </svg>
         </button>
 
-        {/* Navbar top-right */}
+        {/* Favorite button (top-right) */}
         <div className="absolute top-4 right-4">
-          <button className="text-white/90 hover:text-white">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          <button 
+            onClick={() => toggleFavorite(pet)}
+            className={`w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-md ${active ? 'text-pink-500' : 'text-gray-400 hover:text-pink-500'} transition-all`}
+          >
+            <svg className="w-5 h-5" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
           </button>
         </div>
@@ -236,10 +236,14 @@ const PetDetailsPage = () => {
           ))}
           <div className="w-12" />
           {[
-            { icon: "heart", label: "Saved" },
-            { icon: "user", label: "Profile" },
-          ].map(({ icon, label }) => (
-            <button key={label} className="flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400 hover:text-gray-600 transition-colors">
+            { icon: "heart", label: "Saved", action: () => navigate("/adopter/profile") },
+            { icon: "user", label: "Profile", action: () => navigate("/adopter/profile") },
+          ].map(({ icon, label, action }) => (
+            <button 
+              key={label} 
+              onClick={action}
+              className="flex flex-col items-center gap-0.5 px-2 py-1 text-gray-400 hover:text-gray-600 transition-colors"
+            >
               {icon === "heart" ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>
               ) : (
