@@ -8,6 +8,8 @@ export interface PetsContextValue {
   error: string | null
   speciesFilter: string
   setSpeciesFilter: (species: string) => void
+  searchQuery: string
+  setSearchQuery: (query: string) => void
   refreshPets: () => Promise<void>
 }
 

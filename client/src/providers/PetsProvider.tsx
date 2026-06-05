@@ -23,6 +23,7 @@ export const PetsProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [speciesFilter, setSpeciesFilter] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
 
   const refreshPets = useCallback(async () => {
     setLoading(true)
@@ -79,12 +80,12 @@ export const PetsProvider = ({ children }: Props) => {
   }, [])
 
   const filteredPets = useMemo(() => {
-    if (!speciesFilter) return pets
-
-    return pets.filter(
-      (pet) => pet.species.toLowerCase() === speciesFilter.toLowerCase(),
-    )
-  }, [pets, speciesFilter])
+    return pets.filter((pet) => {
+      const matchesSpecies = !speciesFilter || pet.species.toLowerCase() === speciesFilter.toLowerCase()
+      const matchesSearch = !searchQuery.trim() || pet.breed?.toLowerCase().includes(searchQuery.toLowerCase().trim())
+      return matchesSpecies && matchesSearch
+    })
+  }, [pets, speciesFilter, searchQuery])
 
   return (
     <PetsContext.Provider
@@ -95,6 +96,8 @@ export const PetsProvider = ({ children }: Props) => {
         error,
         speciesFilter,
         setSpeciesFilter,
+        searchQuery,
+        setSearchQuery,
         refreshPets,
       }}
     >

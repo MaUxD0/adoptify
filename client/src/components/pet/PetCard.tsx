@@ -34,6 +34,7 @@ export const PetCard = ({ pet, onFavorite }: PetCardProps) => {
           <div>
             <h3 className="text-pink-500 font-bold text-sm leading-tight">{pet.name}</h3>
             <p className="text-gray-400 text-xs mt-0.5">
+              {pet.breed && <span className="text-gray-600 font-medium block">{pet.breed}</span>}
               {pet.gender ? `${pet.gender}, ` : ''}
               {pet.age}
               {pet.age === 1 ? ' año' : ' años'}

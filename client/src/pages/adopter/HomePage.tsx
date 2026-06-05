@@ -33,7 +33,7 @@ const COMMUNITY_MESSAGES = [
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { filteredPets, loading } = usePets();
+  const { filteredPets, loading, searchQuery, setSearchQuery } = usePets();
 
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [msgIndex] = useState(() =>
@@ -42,14 +42,6 @@ const HomePage = () => {
   const msg = COMMUNITY_MESSAGES[msgIndex];
 
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const searchedPets = useMemo(() => {
-    if (!searchQuery.trim()) return filteredPets;
-    return filteredPets.filter((pet) =>
-      pet.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
-    );
-  }, [filteredPets, searchQuery]);
 
   const handleSearchToggle = () => {
     setSearchOpen((prev) => !prev);
@@ -114,7 +106,7 @@ const HomePage = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search pets by name..."
+                placeholder="Search pets by breed..."
                 className="flex-1 bg-transparent text-sm text-gray-700 placeholder-gray-300 focus:outline-none"
               />
               {searchQuery && (
@@ -127,9 +119,9 @@ const HomePage = () => {
             </div>
             {searchQuery && (
               <p className="text-xs text-gray-400 mt-2 ml-1">
-                {searchedPets.length === 0
+                {filteredPets.length === 0
                   ? "No pets match your search"
-                  : `${searchedPets.length} pet${searchedPets.length !== 1 ? "s" : ""} found`}
+                  : `${filteredPets.length} pet${filteredPets.length !== 1 ? "s" : ""} found`}
               </p>
             )}
           </div>
@@ -151,11 +143,11 @@ const HomePage = () => {
                 <div key={i} className="rounded-2xl bg-gray-100 animate-pulse h-52" />
               ))}
             </div>
-          ) : searchedPets.length === 0 ? (
+          ) : filteredPets.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-4xl mb-3">🐾</p>
               <p className="text-gray-400 font-medium">
-                {searchQuery ? `No pets named "${searchQuery}"` : "No pets found"}
+                {searchQuery ? `No pets of breed "${searchQuery}"` : "No pets found"}
               </p>
               {searchQuery && (
                 <button
@@ -168,7 +160,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {searchedPets.map((pet) => (
+              {filteredPets.map((pet) => (
                 <PetCard key={pet.id} pet={pet} />
               ))}
             </div>
