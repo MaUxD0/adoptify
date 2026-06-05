@@ -1,18 +1,16 @@
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Footer from "../../components/pet/Footer";
 import PetCard from "../../components/pet/PetCard";
 import PetFilters from "../../components/pet/PetFilters";
+import { SideMenu } from "../../components/layout/SideMenu";
+import { CommunityModal } from "../../components/adoptions/CommunityModal";
 import { usePets } from "../../hooks/usePets";
-import { useFavorites } from "../../hooks/useFavorites";
 
-const HERO_IMG =
-  "https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&q=80";
-const COMMUNITY_IMG =
-  "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80";
-const DONATE_IMG =
-  "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=300&q=80";
+const HERO_IMG = "https://images.unsplash.com/photo-1561037404-61cd46aa615b?w=800&q=80";
+const COMMUNITY_IMG = "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80";
+const DONATE_IMG = "https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=300&q=80";
 
 const COMMUNITY_MESSAGES = [
   {
@@ -38,12 +36,10 @@ const HomePage = () => {
 
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [msgIndex] = useState(() =>
-    Math.floor(Math.random() * COMMUNITY_MESSAGES.length)
-  );
-  const msg = COMMUNITY_MESSAGES[msgIndex];
-
   const [searchOpen, setSearchOpen] = useState(false);
+  
+  const [msgIndex] = useState(() => Math.floor(Math.random() * COMMUNITY_MESSAGES.length));
+  const msg = COMMUNITY_MESSAGES[msgIndex];
 
   const handleSearchToggle = () => {
     setSearchOpen((prev) => !prev);
@@ -52,51 +48,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* ── SIDE MENU ── */}
-      {showMenu && (
-        <div className="fixed inset-0 z-[100] flex">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowMenu(false)} />
-          <div className="relative w-72 bg-white h-full shadow-2xl animate-slide-right flex flex-col">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-              <span className="text-xl font-black text-gray-900">Menu</span>
-              <button onClick={() => setShowMenu(false)} className="text-gray-400 hover:text-gray-600">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              <button onClick={() => navigate("/adopter/profile")} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 transition-colors text-gray-700 font-medium">
-                <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                My Profile
-              </button>
-              <button onClick={() => navigate("/applications")} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-gray-50 transition-colors text-gray-700 font-medium">
-                <svg className="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                My Applications
-              </button>
-              <div className="h-px bg-gray-100 my-2 mx-4" />
-              <div className="px-4 py-2">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Favorites</p>
-                <FavoritesList />
-              </div>
-            </div>
-
-            <div className="p-4 border-t border-gray-100">
-              <button onClick={() => navigate("/login")} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-red-50 transition-colors text-red-500 font-medium">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Log Out
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <SideMenu isOpen={showMenu} onClose={() => setShowMenu(false)} />
 
       {/* ── NAVBAR ── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 px-5 py-3 flex items-center justify-between">
@@ -144,7 +96,7 @@ const HomePage = () => {
       {/* ── MAIN CONTENT ── */}
       <div className="bg-white rounded-t-3xl -mt-5 relative z-10 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] pt-6 pb-32">
 
-        {/* ── SEARCH BAR (se abre al pulsar Search) ── */}
+        {/* ── SEARCH BAR ── */}
         {searchOpen && (
           <div className="px-5 mb-5">
             <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5">
@@ -220,18 +172,10 @@ const HomePage = () => {
 
         {/* ── COMMUNITY BANNER ── */}
         <section className="mx-4 mt-8 bg-pink-500 rounded-3xl overflow-hidden relative min-h-40 flex items-center">
-          <img
-            src={COMMUNITY_IMG}
-            alt="Community"
-            className="absolute left-0 top-0 h-full w-2/5 object-cover object-right"
-          />
+          <img src={COMMUNITY_IMG} alt="Community" className="absolute left-0 top-0 h-full w-2/5 object-cover object-right" />
           <div className="ml-auto w-[60%] p-5 text-white">
-            <h3 className="font-bold text-base leading-tight mb-2">
-              Become a member of our community
-            </h3>
-            <p className="text-pink-100 text-xs leading-relaxed mb-4">
-              Help us rescue and find loving homes for pets in need.
-            </p>
+            <h3 className="font-bold text-base leading-tight mb-2">Become a member of our community</h3>
+            <p className="text-pink-100 text-xs leading-relaxed mb-4">Help us rescue and find loving homes for pets in need.</p>
             <button
               onClick={() => setShowCommunityModal(true)}
               className="bg-white text-pink-500 font-bold text-xs px-5 py-2 rounded-full hover:bg-pink-50 transition-colors"
@@ -251,9 +195,7 @@ const HomePage = () => {
               <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">donate</span>
             </div>
             <h3 className="text-xl font-black text-gray-900 mb-2">For A Life</h3>
-            <p className="text-gray-500 text-xs leading-relaxed mb-4">
-              Your donation helps us rescue and care for pets in need.
-            </p>
+            <p className="text-gray-500 text-xs leading-relaxed mb-4">Your donation helps us rescue and care for pets in need.</p>
             <button className="bg-pink-500 hover:bg-pink-600 text-white font-bold text-sm px-8 py-2.5 rounded-full transition-colors shadow-md shadow-pink-200">
               Gift
             </button>
@@ -264,7 +206,6 @@ const HomePage = () => {
         </section>
       </div>
 
-      {/* ── FOOTER ── */}
       <Footer />
 
       {/* ── BOTTOM NAV ── */}
@@ -282,172 +223,33 @@ const HomePage = () => {
           </div>
 
           <NavItem icon="home" label="Home" active onClick={() => navigate("/home")} />
-          <NavItem
-            icon="search"
-            label="Search"
-            active={searchOpen}
-            onClick={handleSearchToggle}
-          />
+          <NavItem icon="search" label="Search" active={searchOpen} onClick={handleSearchToggle} />
           <div className="w-12" />
           <NavItem icon="heart" label="Applications" onClick={() => navigate("/applications")} />
           <NavItem icon="user" label="Profile" onClick={() => navigate("/profile")} />
         </div>
       </nav>
 
-      {/* ── COMMUNITY MODAL ── */}
-      {showCommunityModal && (
-        <div
-          className="fixed inset-0 z-100 flex items-end justify-center bg-black/50 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) setShowCommunityModal(false) }}
-        >
-          <div className="bg-white w-full max-w-md rounded-t-3xl px-6 pt-6 pb-10 animate-slide-up">
-            {/* Handle */}
-            <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-6" />
-
-            {/* Emoji grande */}
-            <div className="text-center mb-4">
-              <span className="text-6xl">{msg.emoji}</span>
-            </div>
-
-            {/* Mensaje emotivo */}
-            <h3 className="text-pink-500 text-xl font-black text-center mb-3">
-              {msg.title}
-            </h3>
-            <p className="text-gray-500 text-sm leading-relaxed text-center mb-6">
-              {msg.text}
-            </p>
-
-            {/* Divider */}
-            <div className="h-px bg-gray-100 mb-6" />
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {[
-                { num: "2M+", label: "Animals rescued" },
-                { num: "150K", label: "Happy families" },
-                { num: "500+", label: "Shelters joined" },
-              ].map(({ num, label }) => (
-                <div key={label} className="bg-pink-50 rounded-2xl py-3 px-2 text-center">
-                  <p className="text-pink-500 font-black text-base">{num}</p>
-                  <p className="text-pink-400 text-[10px] font-medium leading-tight mt-0.5">{label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <button
-              onClick={() => setShowCommunityModal(false)}
-              className="w-full bg-pink-500 hover:bg-pink-600 active:scale-[0.98] text-white font-bold text-sm py-4 rounded-full shadow-lg shadow-pink-200 transition-all"
-            >
-              I want to help 🐾
-            </button>
-
-            <button
-              onClick={() => setShowCommunityModal(false)}
-              className="w-full text-gray-400 text-sm font-medium mt-3 py-2 hover:text-gray-600 transition-colors"
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-      )}
+      <CommunityModal isOpen={showCommunityModal} onClose={() => setShowCommunityModal(false)} msg={msg} />
     </div>
   );
 };
 
-const NAV_ICONS: Record<string, ReactNode> = {
-  home: (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-    </svg>
-  ),
-  search: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8" />
-      <path d="M21 21l-4.35-4.35" />
-    </svg>
-  ),
-  heart: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-    </svg>
-  ),
-  user: (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  ),
+const NAV_ICONS: Record<string, React.ReactNode> = {
+  home: <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>,
+  search: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>,
+  heart: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" /></svg>,
+  user: <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
 };
 
-const NavItem = ({
-  icon,
-  label,
-  active,
-  onClick,
-}: {
-  icon: string;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-}) => (
+const NavItem = ({ icon, label, active, onClick }: { icon: string; label: string; active?: boolean; onClick?: () => void }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors ${
-      active ? "text-pink-500" : "text-gray-400 hover:text-gray-600"
-    }`}
+    className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors ${active ? "text-pink-500" : "text-gray-400 hover:text-gray-600"}`}
   >
     {NAV_ICONS[icon]}
     <span className="text-[10px] font-medium">{label}</span>
   </button>
 );
-
-const FavoritesList = () => {
-  const { favorites, toggleFavorite } = useFavorites();
-  const navigate = useNavigate();
-
-  if (favorites.length === 0) {
-    return (
-      <div className="py-8 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100">
-        <p className="text-2xl mb-2">💔</p>
-        <p className="text-gray-400 text-xs font-medium">No favorites yet</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {favorites.map((pet) => (
-        <div key={pet.id} className="group relative bg-white border border-gray-100 rounded-2xl p-2 flex items-center gap-3 hover:shadow-md transition-all">
-          <img 
-            src={pet.image_url || "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80"} 
-            className="w-12 h-12 rounded-xl object-cover" 
-            alt={pet.name} 
-          />
-          <div className="flex-1 min-w-0">
-            <h4 className="text-xs font-bold text-gray-900 truncate">{pet.name}</h4>
-            <p className="text-[10px] text-gray-400 truncate">{pet.breed || pet.species}</p>
-          </div>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleFavorite(pet);
-            }}
-            className="p-2 text-pink-500 hover:bg-pink-50 rounded-full transition-colors"
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-            </svg>
-          </button>
-          <button 
-            onClick={() => navigate(`/pets/${pet.id}`)}
-            className="absolute inset-0 z-0"
-            aria-label={`View ${pet.name}`}
-          />
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export default HomePage;

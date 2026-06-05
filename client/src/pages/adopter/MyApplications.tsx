@@ -7,7 +7,6 @@ import { useChatContext } from "../../providers/ChatProvider";
 import type { Adoption } from "../../types/adoption.types";
 
 function MyApplications() {
-  const [statusFilter] = useState();
   const [trackingAdoption, setTrackingAdoption] = useState<Adoption | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
@@ -24,7 +23,6 @@ function MyApplications() {
   } = useChatContext();
 
   const { adoptions, error } = useAdoptions({
-    status: statusFilter,
     limit: 12,
   });
 

@@ -4,7 +4,7 @@ import { usePets } from "../../hooks/usePets";
 import { useAuth } from "../../hooks/useAuth";
 import { PetsService } from "../../services/pets.service";
 import type { Pet } from "../../types/pet.types";
-
+import toast from "react-hot-toast";
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80";
@@ -24,9 +24,10 @@ const ShelterPetCard = ({
     setDeleting(true);
     try {
       await PetsService.deletePet(pet.id);
+      toast.success("Mascota eliminada");
       onDelete(pet.id);
     } catch {
-      alert("Error al eliminar la mascota");
+      toast.error("Error al eliminar la mascota");
       setDeleting(false);
     }
   };

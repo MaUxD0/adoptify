@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PetsService } from "../../services/pets.service";
 import { Map } from "../../components/ui/Map/Map";
+import toast from "react-hot-toast";
 
 const SPECIES_OPTIONS = [
   { label: "Perro", value: "dog" },
@@ -33,7 +34,7 @@ const CreatePetPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !species || !age || !description || !gender) {
-      alert("Por favor completa los campos obligatorios.");
+      toast.error("Por favor completa los campos obligatorios.");
       return;
     }
     setLoading(true);
@@ -55,13 +56,14 @@ const CreatePetPage = () => {
       }
 
       await PetsService.createPet(payload);
+      toast.success("Mascota publicada con éxito");
       navigate("/shelter/dashboard");
     } catch (error: any) {
       console.error("DETAILED ERROR:", error.response?.data || error);
       const serverMessage = error.response?.data?.errors?.[0]?.message || 
                            error.response?.data?.message || 
                            "Error al crear la mascota";
-      alert(`Error: ${serverMessage}`);
+      toast.error(`Error: ${serverMessage}`);
     } finally {
       setLoading(false);
     }
@@ -115,16 +117,20 @@ const CreatePetPage = () => {
           {/* Especie */}
           <Field label="Especie *">
             <div className="flex flex-wrap gap-2">
-             {SPECIES_OPTIONS.map((s) => (
-         <button
-    key={s.value}
-    type="button"
-    onClick={() => setSpecies(s.value)}  
-    className={`... ${species === s.value ? "bg-pink-500 ..." : "..."}`}
-  >
-    {s.label}  
-  </button>
-))}
+              {SPECIES_OPTIONS.map((s) => (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setSpecies(s.value)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                    species === s.value
+                      ? "bg-pink-500 text-white border-pink-500 shadow-md shadow-pink-200"
+                      : "border-gray-200 text-gray-400 hover:border-pink-300 hover:text-pink-500"
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
             </div>
           </Field>
 

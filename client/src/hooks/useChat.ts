@@ -12,11 +12,8 @@ export function useConversations() {
   } = useChatContext();
 
   useEffect(() => {
-    console.log("useConversations: Loading conversations on mount");
     loadConversations();
   }, [loadConversations]);
-
-  console.log("useConversations: Conversations count =", conversations.length, "Active ID =", activeConversationId);
 
   return {
     conversations,

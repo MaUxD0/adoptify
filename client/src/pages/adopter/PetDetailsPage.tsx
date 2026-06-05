@@ -46,10 +46,11 @@ const PetDetailsPage = () => {
     if (!id) return;
     try {
       await PetsService.deletePet(id);
+      toast.success("Mascota eliminada");
       navigate("/");
     } catch (error) {
       console.error(error);
-      alert("Error deleting pet");
+      toast.error("Error al eliminar la mascota");
     }
   };
 

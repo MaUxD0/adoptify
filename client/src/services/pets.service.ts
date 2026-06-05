@@ -19,11 +19,6 @@ export class PetsService {
     return data.data ?? []
   }
 
-  static async getAllPets(): Promise<Pet[]> {
-    const { data } = await axios.get<PetsApiResponse>('/pets')
-    return data.data ?? []
-  }
-
   static async getPetById(id: string): Promise<Pet | null> {
     const { data } = await axios.get<PetApiResponse>(`/pets/${id}`)
     return data.data ?? null

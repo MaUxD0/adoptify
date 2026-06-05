@@ -134,7 +134,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     const channelName = `chat_${state.activeConversationId}`;
-    console.log("ChatProvider: Setting up subscription to", channelName);
     
     const channel = supabase.channel(channelName, {
       config: { broadcast: { self: false } }
@@ -144,43 +143,35 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     
     channel
       .on('broadcast', { event: 'message:created' }, ({ payload }) => {
-        console.log("ChatProvider: Received message event from", channelName, payload);
         if (payload?.message && isSubscribed) {
           dispatch({ type: 'MESSAGE_RECEIVED', payload: payload.message });
         }
       })
       .subscribe((status) => {
-        console.log("ChatProvider: Channel", channelName, "status:", status);
         if (status === 'SUBSCRIBED') {
           isSubscribed = true;
-          console.log("ChatProvider: Successfully subscribed to", channelName);
         }
         if (status === 'CHANNEL_ERROR') {
-          console.error("ChatProvider: Channel error for", channelName);
+          console.error("Chat error for", channelName);
         }
       });
 
     return () => {
-      console.log("ChatProvider: Cleaning up subscription to", channelName);
       supabase.removeChannel(channel);
     };
   }, [state.activeConversationId]);
 
   const loadConversations = useCallback(async () => {
-    console.log("ChatProvider: Loading conversations...");
     dispatch({ type: 'CONVERSATIONS_LOADING' });
     const conversations = await chatService.getConversations();
-    console.log("ChatProvider: Loaded", conversations.length, "conversations");
     dispatch({ type: 'CONVERSATIONS_SUCCESS', payload: conversations });
   }, []);
 
   const openConversation = useCallback(async (id: string) => {
-    console.log("ChatProvider: Opening conversation with ID:", id);
     dispatch({ type: 'SET_ACTIVE', payload: id });
     dispatch({ type: 'MESSAGES_LOADING' });
     try {
       const result = await chatService.getMessages(id, 1);
-      console.log("ChatProvider: Messages loaded for conversation", id, "Total:", result.total);
       dispatch({
         type: 'MESSAGES_SUCCESS',
         payload: { messages: result.data, total: result.total, page: 1, prepend: false },

@@ -26,9 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(mappedUser);
         localStorage.setItem("token", session.access_token);
         localStorage.setItem("user", JSON.stringify(mappedUser));
-
-        console.log("USER SAVED:", mappedUser);
-        console.log("TOKEN SAVED:", session.access_token);
       } else {
         setUser(null);
         localStorage.removeItem("token");
@@ -45,12 +42,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
     setLoading(true);
     try {
-      const { data: authData, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: data.email.trim(),
         password: data.password,
       });
-      console.log("LOGIN RESPONSE:", authData);
-      console.log("LOGIN ERROR:", error);
       if (error) throw error;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Error al iniciar sesión";

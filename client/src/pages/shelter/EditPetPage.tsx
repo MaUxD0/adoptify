@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePets } from "../../hooks/usePets";
 import { PetsService } from "../../services/pets.service";
 import { Map } from "../../components/ui/Map/Map";
+import toast from "react-hot-toast";
 
 const SPECIES_OPTIONS = ["Perro", "Gato", "Conejo", "Ave", "Otro"];
 const SIZE_OPTIONS = ["Pequeño", "Mediano", "Grande"];
@@ -14,7 +15,7 @@ const GENDER_OPTIONS = [
 const EditPetPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { pets } = usePets();
+  const { pets, refreshPets } = usePets();
   const pet = pets.find((p) => p.id === id);
 
   const [name, setName] = useState(pet?.name ?? "");
@@ -70,13 +71,15 @@ const EditPetPage = () => {
       }
 
       await PetsService.updatePet(id, payload);
+      toast.success("Mascota actualizada con éxito");
+      await refreshPets();
       navigate("/shelter/dashboard");
     } catch (error: any) {
       console.error("DETAILED ERROR:", error.response?.data || error);
       const serverMessage = error.response?.data?.errors?.[0]?.message || 
                            error.response?.data?.message || 
                            "Error al actualizar la mascota";
-      alert(`Error: ${serverMessage}`);
+      toast.error(`Error: ${serverMessage}`);
     } finally {
       setLoading(false);
     }

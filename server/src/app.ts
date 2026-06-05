@@ -36,17 +36,6 @@ app.get('/api/health', (_req, res) => {
   res.json({ success: true, message: 'API running' })
 })
 
-// DEV ONLY — borrar cuando auth esté integrado
-app.post('/api/dev/login', (req, res) => {
-  const { role = 'ADOPTER' } = req.body
-  const token = jwt.sign(
-    { id: '00000000-0000-0000-0000-000000000001', email: 'dev@test.com', role },
-    env.JWT_SECRET,
-    { expiresIn: '24h' },
-  )
-  res.json({ token })
-})
-
 app.use(errorMiddleware)
 
 export default app
